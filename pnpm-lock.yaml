@@ -27,6 +27,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.5-nightly.81fdedb
         version: 1.9.5-nightly.81fdedb
+      '@hiogawa/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@tsconfig/strictest':
         specifier: ^2.0.5
         version: 2.0.5
@@ -301,6 +304,9 @@ packages:
 
   '@hiogawa/tiny-rpc@0.2.3-pre.18':
     resolution: {integrity: sha512-BiNHrutG9G9yV622QvkxZxF+PhkaH2Aspp4/X1KYTfnaQTcg4fFUTBWf5Kf533swon2SuVJwi6U6H1LQbhVOQQ==}
+
+  '@hiogawa/utils@1.7.0':
+    resolution: {integrity: sha512-ghiEFWBR1NENoHn+lSuW7liicTIzVPN+8Srm5UedCTw43gus0mlse6Wp2lz6GmbOXJ/CalMPp/0Tz2X8tajkAg==}
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -1981,6 +1987,8 @@ snapshots:
   '@fregante/relaxed-json@2.0.0': {}
 
   '@hiogawa/tiny-rpc@0.2.3-pre.18': {}
+
+  '@hiogawa/utils@1.7.0': {}
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:

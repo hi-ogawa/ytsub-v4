@@ -6,16 +6,32 @@ export type { RpcHandler };
 class RpcHandler {
 	constructor() {}
 
-	fetchMetadata(videoId: string) {}
+	fetchMetadata(videoId: string) {
+		return fetchMetadataJson(videoId);
+	}
 
-	play() {}
+	play() {
+		const el = document.querySelector<HTMLVideoElement>(
+			"video.html5-main-video",
+		)!;
+		el.play();
+	}
 
-	pause() {}
+	pause() {
+		const el = document.querySelector<HTMLVideoElement>(
+			"video.html5-main-video",
+		)!;
+		el.pause();
+	}
 
 	seek() {}
 }
 
-import { type TinyRpcServerAdapter, exposeTinyRpc } from "@hiogawa/tiny-rpc";
+import {
+	type TinyRpcServerAdapter,
+	exposeTinyRpc,
+	messagePortServerAdapter,
+} from "@hiogawa/tiny-rpc";
 
 function rpcServerAdapterCotentScript(): TinyRpcServerAdapter<void> {
 	return {
@@ -41,9 +57,47 @@ function setupRpc() {
 	});
 }
 
+import { tinyassert } from "@hiogawa/utils";
+
+function setupIframe() {
+	// TODO: allow resize/move via wrapper dom
+	const host = document.createElement("div");
+	host.className = "web-ext-ytsub";
+	host.style.cssText = `position: absolute; z-index: 10000;`;
+
+	// iframe in shadow dom
+	const shadowRoot = host.attachShadow({ mode: "closed" });
+	const iframe = document.createElement("iframe");
+	iframe.src = "http://localhost:18181/src/iframe/index.html";
+	iframe.style.cssText = "border: 0; width: 100%; height: 100%;";
+	shadowRoot.appendChild(iframe);
+	document.body.appendChild(host);
+
+	// setup rpc
+	iframe.addEventListener("load", () => {
+		const channel = new MessageChannel();
+
+		exposeTinyRpc({
+			routes: new RpcHandler(),
+			adapter: messagePortServerAdapter({
+				port: channel.port1,
+			}),
+		});
+		channel.port1.start();
+
+		tinyassert(iframe.contentWindow);
+		iframe.contentWindow.postMessage("test message channel", "*", [
+			channel.port2,
+		]);
+	});
+}
+
 async function main() {
+	if (1) {
+		setupIframe();
+		return;
+	}
 	setupRpc();
-	if (1) return;
 	renderApp();
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// alert("RECEIVED: " + JSON.stringify(message))
