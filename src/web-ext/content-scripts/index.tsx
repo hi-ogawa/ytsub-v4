@@ -34,10 +34,15 @@ function main() {
 	wrapper.className = "web-ext-ytsub";
 	wrapper.style.cssText = `
 		position: absolute;
-		z-index: 10000;
+		z-index: 2020;
 		top: 50px;
-  	right: 50px;
+		right: 50px;
+		width: 400px;
+		height: 600px;
 		background: white;
+		border-radius: 6px;
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+		overflow: hidden;
 	`;
 
 	// move by dragging top-right corner
@@ -56,6 +61,7 @@ function main() {
 		wrapper.appendChild(movableCorner);
 
 		function move(event: MouseEvent) {
+			if (event.clientX === 0 || event.clientY === 0) return;
 			const left = event.clientX + movableCorner.clientWidth / 2;
 			const top = event.clientY - movableCorner.clientHeight / 2;
 			wrapper.style.right = `${document.body.clientWidth - left}px`;
@@ -82,6 +88,7 @@ function main() {
 
 		let startRight: number;
 		function resize(event: MouseEvent) {
+			if (event.clientX === 0 || event.clientY === 0) return;
 			const left = event.clientX - resizeCorner.offsetWidth / 2;
 			const bottom = event.clientY + resizeCorner.clientHeight / 2;
 			wrapper.style.width = `${startRight - left}px`;
