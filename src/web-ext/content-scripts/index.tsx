@@ -1,7 +1,49 @@
 import React from "react";
 import ReactDOMClient from "react-dom/client";
 
+export type { RpcHandler };
+
+class RpcHandler {
+	constructor() {}
+
+	fetchMetadata(videoId: string) {}
+
+	play() {}
+
+	pause() {}
+
+	seek() {}
+}
+
+import { type TinyRpcServerAdapter, exposeTinyRpc } from "@hiogawa/tiny-rpc";
+
+function rpcServerAdapterCotentScript(): TinyRpcServerAdapter<void> {
+	return {
+		register: (invokeRoute) => {
+			chrome.runtime.onMessage.addListener(
+				async (message, _sender, sendResponse) => {
+					try {
+						const value = await invokeRoute(message);
+						sendResponse({ ok: true, value });
+					} catch (e) {
+						sendResponse({ ok: false, value: e });
+					}
+				},
+			);
+		},
+	};
+}
+
+function setupRpc() {
+	exposeTinyRpc({
+		routes: new RpcHandler(),
+		adapter: rpcServerAdapterCotentScript(),
+	});
+}
+
 async function main() {
+	setupRpc();
+	if (1) return;
 	renderApp();
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// alert("RECEIVED: " + JSON.stringify(message))
@@ -69,6 +111,7 @@ async function main() {
 
 // TODO: use iframe for rendering (which allows dev hmr)
 // TODO: only need to setup RPC for video playback, cors-protected video data fetching, etc...
+//       can we use `window.postMessage`  here?
 function renderApp() {
 	const host = document.createElement("div");
 	const shadowRoot = host.attachShadow({ mode: "closed" });
@@ -102,6 +145,7 @@ function renderApp() {
 				>
 					Pause
 				</button>
+				{/* TODO: will iframe also work for non localhost? */}
 				<iframe src="http://localhost:18181/src/web-ext/options/index.html"></iframe>
 			</div>
 		);

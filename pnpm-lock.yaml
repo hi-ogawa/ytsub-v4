@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@hiogawa/tiny-rpc':
+        specifier: 0.2.3-pre.18
+        version: 0.2.3-pre.18
       '@types/react':
         specifier: ^19.0.10
         version: 19.0.10
@@ -295,6 +298,9 @@ packages:
   '@fregante/relaxed-json@2.0.0':
     resolution: {integrity: sha512-PyUXQWB42s4jBli435TDiYuVsadwRHnMc27YaLouINktvTWsL3FcKrRMGawTayFk46X+n5bE23RjUTWQwrukWw==}
     engines: {node: '>= 0.10.0'}
+
+  '@hiogawa/tiny-rpc@0.2.3-pre.18':
+    resolution: {integrity: sha512-BiNHrutG9G9yV622QvkxZxF+PhkaH2Aspp4/X1KYTfnaQTcg4fFUTBWf5Kf533swon2SuVJwi6U6H1LQbhVOQQ==}
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -1973,6 +1979,8 @@ snapshots:
   '@fluent/syntax@0.19.0': {}
 
   '@fregante/relaxed-json@2.0.0': {}
+
+  '@hiogawa/tiny-rpc@0.2.3-pre.18': {}
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:

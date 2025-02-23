@@ -11,7 +11,7 @@
 		"128": "assets/icon-128.png"
 	},
 	"action": {
-		"default_popup": "popup/index.html"
+		"default_popup": "popup/index.html?popup"
 	},
 	"options_page": "options/index.html",
 	"background": {
