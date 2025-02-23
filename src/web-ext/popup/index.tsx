@@ -44,7 +44,7 @@ function App() {
 			<div>{typeof chrome}</div>
 			<button
 				onClick={async () => {
-					const result = await rpc.fetchMetadata("GRgUK0JGoNg");
+					const result = await rpc.getMetadata("GRgUK0JGoNg");
 					console.log(result);
 					// chrome.tabs.query(
 					// 	{ active: true, currentWindow: true },

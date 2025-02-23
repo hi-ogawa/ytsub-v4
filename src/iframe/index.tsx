@@ -38,7 +38,10 @@ function App() {
 		<div>
 			<button
 				onClick={async () => {
-					const result = await rpcClient.fetchMetadata("GRgUK0JGoNg");
+					const result = await rpcClient.getMetadata();
+					if (result) {
+						result.captions?.playerCaptionsTracklistRenderer.captionTracks;
+					}
 					setMetadata(result);
 				}}
 			>
@@ -58,7 +61,14 @@ function App() {
 			>
 				pause
 			</button>
-			<pre>{metadata && JSON.stringify(metadata, null, 2)}</pre>
+			{/* <pre>{metadata && JSON.stringify(metadata, null, 2)}</pre> */}
+			<pre>
+				{JSON.stringify(
+					metadata?.captions?.playerCaptionsTracklistRenderer.captionTracks,
+					null,
+					2,
+				)}
+			</pre>
 		</div>
 	);
 }

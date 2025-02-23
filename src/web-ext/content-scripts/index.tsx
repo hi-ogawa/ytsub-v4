@@ -7,8 +7,13 @@ export type { RpcHandler };
 class RpcHandler {
 	constructor() {}
 
-	fetchMetadata(videoId: string) {
-		return fetchMetadataJson(videoId);
+	getMetadata() {
+		const url = new URL(window.location.href);
+		const videoId = url.searchParams.get("v");
+		if (url.pathname === "/watch" && videoId) {
+			return fetchMetadataJson(videoId);
+		}
+		return;
 	}
 
 	play() {
