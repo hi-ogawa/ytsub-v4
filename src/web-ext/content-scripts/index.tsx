@@ -67,6 +67,8 @@ async function main() {
 	// }
 }
 
+// TODO: use iframe for rendering (which allows dev hmr)
+// TODO: only need to setup RPC for video playback, cors-protected video data fetching, etc...
 function renderApp() {
 	const host = document.createElement("div");
 	const shadowRoot = host.attachShadow({ mode: "closed" });
@@ -100,6 +102,7 @@ function renderApp() {
 				>
 					Pause
 				</button>
+				<iframe src="http://localhost:18181/src/web-ext/options/index.html"></iframe>
 			</div>
 		);
 	}
