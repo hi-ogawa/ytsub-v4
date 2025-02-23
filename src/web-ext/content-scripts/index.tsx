@@ -2,38 +2,14 @@ import { exposeTinyRpc, messagePortServerAdapter } from "@hiogawa/tiny-rpc";
 import { tinyassert } from "@hiogawa/utils";
 import { fetchMetadataJson } from "../../utils";
 
-export type { RpcHandler };
-
-class RpcHandler {
-	constructor() {}
-
-	getMetadata() {
-		const url = new URL(window.location.href);
-		const videoId = url.searchParams.get("v");
-		if (url.pathname === "/watch" && videoId) {
-			return fetchMetadataJson(videoId);
-		}
-		return;
+async function main() {
+	const enabled = (await chrome.storage.local.get("enabled"))["enabled"];
+	if (enabled) {
+		setupView();
 	}
-
-	play() {
-		const el = document.querySelector<HTMLVideoElement>(
-			"video.html5-main-video",
-		)!;
-		el.play();
-	}
-
-	pause() {
-		const el = document.querySelector<HTMLVideoElement>(
-			"video.html5-main-video",
-		)!;
-		el.pause();
-	}
-
-	seek() {}
 }
 
-function main() {
+function setupView() {
 	// TODO: save and restore position and size
 	const wrapper = document.createElement("div");
 	wrapper.className = "web-ext-ytsub";
@@ -132,6 +108,41 @@ function main() {
 			channel.port2,
 		]);
 	});
+
+	return () => {
+		wrapper.remove();
+	};
+}
+
+export class RpcHandler {
+	constructor() {}
+
+	close() {}
+
+	getMetadata() {
+		const url = new URL(window.location.href);
+		const videoId = url.searchParams.get("v");
+		if (url.pathname === "/watch" && videoId) {
+			return fetchMetadataJson(videoId);
+		}
+		return;
+	}
+
+	play() {
+		const el = document.querySelector<HTMLVideoElement>(
+			"video.html5-main-video",
+		)!;
+		el.play();
+	}
+
+	pause() {
+		const el = document.querySelector<HTMLVideoElement>(
+			"video.html5-main-video",
+		)!;
+		el.pause();
+	}
+
+	seek() {}
 }
 
 main();

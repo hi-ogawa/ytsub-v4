@@ -10,61 +10,31 @@ function main() {
 	);
 }
 
-import { type TinyRpcClientAdapter, proxyTinyRpc } from "@hiogawa/tiny-rpc";
-import type { RpcHandler } from "../content-scripts";
-
-export const rpc = proxyTinyRpc<RpcHandler>({
-	adapter: rpcClientAdapterPopup(),
-});
-
-function rpcClientAdapterPopup(): TinyRpcClientAdapter {
-	return {
-		send: async (data) => {
-			const tabs = await chrome.tabs.query({
-				active: true,
-				currentWindow: true,
-			});
-			const tab = tabs[0]!;
-			const result = await chrome.tabs.sendMessage(tab.id!, data);
-			if (result.ok) {
-				return result.value;
-			} else {
-				throw Object.assign(new Error("rpc error"), result.value);
-			}
-		},
-	};
-}
-
 function App() {
+	let [enabled, setEnabled] = React.useState(false);
+
+	React.useEffect(() => {
+		(async () => {
+			setEnabled((await chrome.storage.local.get("enabled"))["enabled"]);
+		})();
+	}, []);
+
 	return (
-		<main style={{ width: "500px" }}>
-			<a href={window.location.href} target="_blank">
-				Pop out to tab
-			</a>
-			<div>{typeof chrome}</div>
-			<button
-				onClick={async () => {
-					const result = await rpc.getMetadata("GRgUK0JGoNg");
-					console.log(result);
-					// chrome.tabs.query(
-					// 	{ active: true, currentWindow: true },
-					// 	function (tabs) {
-					// 		const tab = tabs[0];
-					// 		if (tab?.id) {
-					// 			chrome.tabs.sendMessage(
-					// 				tab.id,
-					// 				{ message: "Hello from popup" },
-					// 				function (response) {
-					// 					console.log(response);
-					// 				},
-					// 			);
-					// 		}
-					// 	},
-					// );
-				}}
-			>
-				Test
-			</button>
+		<main style={{ width: "200px" }}>
+			<label style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+				<span>Show subtitles</span>
+				<input
+					type="checkbox"
+					checked={enabled}
+					onChange={(e) => {
+						const value = e.currentTarget.checked;
+						React.startTransition(async () => {
+							await chrome.storage.local.set({ enabled: value });
+							setEnabled(value);
+						});
+					}}
+				/>
+			</label>
 		</main>
 	);
 }

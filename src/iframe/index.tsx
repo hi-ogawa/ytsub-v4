@@ -61,6 +61,13 @@ function App() {
 			>
 				pause
 			</button>
+			<button
+				onClick={() => {
+					rpcClient.close();
+				}}
+			>
+				close
+			</button>
 			{/* <pre>{metadata && JSON.stringify(metadata, null, 2)}</pre> */}
 			<pre>
 				{JSON.stringify(
