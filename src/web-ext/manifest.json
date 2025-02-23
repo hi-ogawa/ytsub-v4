@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json.schemastore.org/chrome-manifest",
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "Youtube subtitle viewer V4",
 	"version": "1.0.0.0",
 	"homepage_url": "https://github.com/hi-ogawa/ytsub-v4",
@@ -10,10 +10,17 @@
 		"48": "assets/icon-48.png",
 		"128": "assets/icon-128.png"
 	},
-	"permissions": [],
-	"content_security_policy": "script-src 'self' 'unsafe-inline'; script-src-elem 'self' 'unsafe-inline' http://localhost:18181",
-	"browser_action": {
-		"default_popup": "popup/index.html"
+	"action": {
+		"default_popup": "popup"
 	},
-	"options_page": "options/index.html"
+	"options_page": "options/index.html",
+	"background": {
+		"type": "module",
+		"service_worker": "background/index.js"
+	},
+	"permissions": [],
+	"host_permissions": ["http://localhost/*", "https://www.youtube.com/*"],
+	"content_security_policy": {
+		"extension_pages": "script-src 'self' 'wasm-unsafe-eval' http://localhost:*; object-src 'self';"
+	}
 }
