@@ -1,11 +1,12 @@
 import {
-	TinyRpcProxy,
+	type TinyRpcProxy,
 	messagePortClientAdapter,
 	proxyTinyRpc,
 } from "@hiogawa/tiny-rpc";
 import { tinyassert } from "@hiogawa/utils";
 import React from "react";
 import ReactDOMClient from "react-dom/client";
+import { type VideoMetadata } from "../utils";
 import type { RpcHandler } from "../web-ext/content-scripts";
 
 let rpcClient: TinyRpcProxy<RpcHandler>;
@@ -13,16 +14,13 @@ let rpcClient: TinyRpcProxy<RpcHandler>;
 async function main() {
 	await new Promise<void>((resolve) => {
 		window.addEventListener("message", (event) => {
-			console.log(event);
 			tinyassert(event.origin === "https://www.youtube.com");
 			const port = event.ports[0];
 			tinyassert(port);
-
 			rpcClient = proxyTinyRpc<RpcHandler>({
 				adapter: messagePortClientAdapter({ port }),
 			});
 			port.start();
-
 			resolve();
 		});
 	});
@@ -35,15 +33,16 @@ async function main() {
 }
 
 function App() {
+	const [metadata, setMetadata] = React.useState<VideoMetadata>();
 	return (
 		<div>
 			<button
 				onClick={async () => {
 					const result = await rpcClient.fetchMetadata("GRgUK0JGoNg");
-					console.log(result);
+					setMetadata(result);
 				}}
 			>
-				Test
+				Load subtitles
 			</button>
 			<button
 				onClick={() => {
@@ -59,6 +58,7 @@ function App() {
 			>
 				pause
 			</button>
+			<pre>{metadata && JSON.stringify(metadata, null, 2)}</pre>
 		</div>
 	);
 }

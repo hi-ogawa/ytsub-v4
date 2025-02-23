@@ -1,5 +1,6 @@
-import React from "react";
-import ReactDOMClient from "react-dom/client";
+import { exposeTinyRpc, messagePortServerAdapter } from "@hiogawa/tiny-rpc";
+import { tinyassert } from "@hiogawa/utils";
+import { fetchMetadataJson } from "../../utils";
 
 export type { RpcHandler };
 
@@ -27,51 +28,80 @@ class RpcHandler {
 	seek() {}
 }
 
-import {
-	type TinyRpcServerAdapter,
-	exposeTinyRpc,
-	messagePortServerAdapter,
-} from "@hiogawa/tiny-rpc";
+function main() {
+	// TODO: save and restore position and size
+	const wrapper = document.createElement("div");
+	wrapper.className = "web-ext-ytsub";
+	wrapper.style.cssText = `
+		position: absolute;
+		z-index: 10000;
+		top: 50px;
+  	right: 50px;
+		background: white;
+	`;
 
-function rpcServerAdapterCotentScript(): TinyRpcServerAdapter<void> {
-	return {
-		register: (invokeRoute) => {
-			chrome.runtime.onMessage.addListener(
-				async (message, _sender, sendResponse) => {
-					try {
-						const value = await invokeRoute(message);
-						sendResponse({ ok: true, value });
-					} catch (e) {
-						sendResponse({ ok: false, value: e });
-					}
-				},
-			);
-		},
-	};
-}
+	// move by dragging top-right corner
+	{
+		const movableCorner = document.createElement("div");
+		movableCorner.style.cssText = `
+			position: absolute;
+			width: 16px;
+			height: 16px;
+			background: darkgray;
+			top: 0;
+			right: 0;
+			cursor: grab;
+		`;
+		movableCorner.draggable = true;
+		wrapper.appendChild(movableCorner);
 
-function setupRpc() {
-	exposeTinyRpc({
-		routes: new RpcHandler(),
-		adapter: rpcServerAdapterCotentScript(),
-	});
-}
+		function move(event: MouseEvent) {
+			const left = event.clientX + movableCorner.clientWidth / 2;
+			const top = event.clientY - movableCorner.clientHeight / 2;
+			wrapper.style.right = `${document.body.clientWidth - left}px`;
+			wrapper.style.top = `${top}px`;
+		}
+		movableCorner.addEventListener("drag", (event) => move(event));
+		movableCorner.addEventListener("dragend", (event) => move(event));
+	}
 
-import { tinyassert } from "@hiogawa/utils";
+	// resize by dragging bottom-left corner
+	{
+		const resizeCorner = document.createElement("div");
+		resizeCorner.style.cssText = `
+			position: absolute;
+			width: 15px;
+			height: 15px;
+			background: darkgray;
+			bottom: 0;
+			left: 0;
+			cursor: nesw-resize;
+		`;
+		resizeCorner.draggable = true;
+		wrapper.appendChild(resizeCorner);
 
-function setupIframe() {
-	// TODO: allow resize/move via wrapper dom
-	const host = document.createElement("div");
-	host.className = "web-ext-ytsub";
-	host.style.cssText = `position: absolute; z-index: 10000;`;
+		let startRight: number;
+		function resize(event: MouseEvent) {
+			const left = event.clientX - resizeCorner.offsetWidth / 2;
+			const bottom = event.clientY + resizeCorner.clientHeight / 2;
+			wrapper.style.width = `${startRight - left}px`;
+			wrapper.style.height = `${bottom - wrapper.offsetTop}px`;
+		}
+		resizeCorner.addEventListener("dragstart", () => {
+			startRight = wrapper.offsetLeft + wrapper.offsetWidth;
+		});
+		resizeCorner.addEventListener("drag", (event) => resize(event));
+		resizeCorner.addEventListener("dragend", (event) => resize(event));
+	}
 
-	// iframe in shadow dom
-	const shadowRoot = host.attachShadow({ mode: "closed" });
+	// setup iframe
 	const iframe = document.createElement("iframe");
-	iframe.src = "http://localhost:18181/src/iframe/index.html";
+	iframe.src = import.meta.env.DEV
+		? "http://localhost:18181/src/iframe/index.html"
+		: "/todo";
 	iframe.style.cssText = "border: 0; width: 100%; height: 100%;";
-	shadowRoot.appendChild(iframe);
-	document.body.appendChild(host);
+	wrapper.appendChild(iframe);
+	document.body.appendChild(wrapper);
 
 	// setup rpc
 	iframe.addEventListener("load", () => {
@@ -90,168 +120,6 @@ function setupIframe() {
 			channel.port2,
 		]);
 	});
-}
-
-async function main() {
-	if (1) {
-		setupIframe();
-		return;
-	}
-	setupRpc();
-	renderApp();
-	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		// alert("RECEIVED: " + JSON.stringify(message))
-
-		const host = document.createElement("div");
-		const shadowRoot = host.attachShadow({ mode: "closed" });
-		// const style = document.createElement("style");
-		// style.textContent = `
-		//   @import "/src/web-ext/styles.css"
-		// `;
-		// shadowRoot.appendChild(style);
-		// shadowRoot.innerHTML = `<pre>${JSON.stringify(message)}</pre>`;
-
-		host.style.cssText = `
-			position: absolute;
-			z-index: 10000;
-			background: #ffffff;
-		`;
-		document.body.appendChild(host);
-
-		function App() {
-			return (
-				<div>
-					<pre>{JSON.stringify(message)}</pre>
-					<button
-						onClick={() => {
-							const el = document.querySelector<HTMLVideoElement>(
-								"video.html5-main-video",
-							)!;
-							el.play();
-						}}
-					>
-						Play
-					</button>
-					<button
-						onClick={() => {
-							const el = document.querySelector<HTMLVideoElement>(
-								"video.html5-main-video",
-							)!;
-							el.pause();
-						}}
-					>
-						Pause
-					</button>
-				</div>
-			);
-		}
-
-		ReactDOMClient.createRoot(shadowRoot).render(
-			<React.StrictMode>
-				<App />
-			</React.StrictMode>,
-		);
-	});
-	// const url = new URL(window.location.href);
-	// if (url.pathname === '/watch') {
-	//   const videoId = url.searchParams.get('v');
-	//   if (videoId) {
-	//     const metadata = await fetchMetadataJson(videoId);
-	//     console.log(metadata)
-	//     alert("okay!!")
-	//   }
-	// }
-}
-
-// TODO: use iframe for rendering (which allows dev hmr)
-// TODO: only need to setup RPC for video playback, cors-protected video data fetching, etc...
-//       can we use `window.postMessage`  here?
-function renderApp() {
-	const host = document.createElement("div");
-	const shadowRoot = host.attachShadow({ mode: "closed" });
-	host.style.cssText = `
-		position: absolute;
-		z-index: 10000;
-		background: #ffffff;
-	`;
-	document.body.appendChild(host);
-
-	function App() {
-		return (
-			<div>
-				<button
-					onClick={() => {
-						const el = document.querySelector<HTMLVideoElement>(
-							"video.html5-main-video",
-						)!;
-						el.play();
-					}}
-				>
-					Play
-				</button>
-				<button
-					onClick={() => {
-						const el = document.querySelector<HTMLVideoElement>(
-							"video.html5-main-video",
-						)!;
-						el.pause();
-					}}
-				>
-					Pause
-				</button>
-				{/* TODO: will iframe also work for non localhost? */}
-				<iframe src="http://localhost:18181/src/web-ext/options/index.html"></iframe>
-			</div>
-		);
-	}
-
-	ReactDOMClient.createRoot(shadowRoot).render(
-		<React.StrictMode>
-			<App />
-		</React.StrictMode>,
-	);
-}
-
-async function fetchMetadataJson(videoId: string) {
-	const res = await fetch("https://www.youtube.com/youtubei/v1/player", {
-		method: "POST",
-		body: JSON.stringify({
-			videoId,
-			context: {
-				client: {
-					clientName: "IOS",
-					clientVersion: "19.45.4",
-					deviceMake: "Apple",
-					deviceModel: "iPhone16,2",
-					userAgent:
-						"com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)",
-					osName: "iPhone",
-					osVersion: "18.1.0.22B83",
-					hl: "en",
-					timeZokne: "UTC",
-					utcOffsetMinutes: 0,
-				},
-			},
-			playbackContext: {
-				contentPlaybackContext: {
-					html5Preference: "HTML5_PREF_WANTS",
-					signatureTimestamp: 20073,
-				},
-			},
-			contentCheckOk: true,
-			racyCheckOk: true,
-		}),
-		headers: {
-			"X-YouTube-Client-Name": "5",
-			"X-YouTube-Client-Version": "19.45.4",
-			Origin: "https://www.youtube.com",
-			"User-Agent":
-				"com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)",
-			"content-type": "application/json",
-			"X-Goog-Visitor-Id": "CgtwU3N6UXVjakdWbyi94bi7BjIKCgJKUBIEGgAgUQ%3D%3D",
-		},
-	});
-	return await res.json();
 }
 
 main();
