@@ -11,15 +11,23 @@
 		"128": "assets/icon-128.png"
 	},
 	"action": {
-		"default_popup": "popup"
+		"default_popup": "popup/index.html"
 	},
 	"options_page": "options/index.html",
 	"background": {
 		"type": "module",
 		"service_worker": "background/index.js"
 	},
+	"content_scripts": [
+		{
+			"matches": ["https://www.youtube.com/*"],
+			"js": ["content-scripts/index.js"],
+			"run_at": "document_end",
+			"world": "ISOLATED"
+		}
+	],
 	"permissions": [],
-	"host_permissions": ["http://localhost/*", "https://www.youtube.com/*"],
+	"host_permissions": ["http://localhost/*"],
 	"content_security_policy": {
 		"extension_pages": "script-src 'self' 'wasm-unsafe-eval' http://localhost:*; object-src 'self';"
 	}

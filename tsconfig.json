@@ -4,6 +4,7 @@
 		"exactOptionalPropertyTypes": false,
 		"checkJs": false,
 		"noEmit": true,
+		"types": ["@types/chrome"],
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"target": "ESNext",
