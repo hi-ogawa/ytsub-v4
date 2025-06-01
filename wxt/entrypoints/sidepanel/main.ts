@@ -1,7 +1,7 @@
 import "./style.css";
 import typescriptLogo from "@/assets/typescript.svg";
-import { setupCounter } from "@/components/counter";
 import viteLogo from "/wxt.svg";
+import { setupCounter } from "./counter";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -23,5 +23,25 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
 
+async function main() {
+	// TODO: can sidepanel directly talk to content script?
+	const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+	// looks like it can
+	console.log(tabs);
+}
+
+main();
+
 // TODO
 // https://developer.chrome.com/docs/extensions/reference/api/sidePanel
+
+// RPC architecture
+// sidepanel
+// -
+//
+// background
+// - just proxy
+//
+// content
+// - video player
+// - metadata api
