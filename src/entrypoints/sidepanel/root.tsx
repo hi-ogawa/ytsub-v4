@@ -100,8 +100,26 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 							padding: "0.2rem",
 						}}
 					>
-						<div style={{ marginBottom: "0.1rem" }}>
-							{stringifyTimestamp(e.begin)} - {stringifyTimestamp(e.end)}
+						<div
+							style={{ marginBottom: "0.1rem", display: "flex", gap: "0.5rem" }}
+						>
+							<span>
+								{stringifyTimestamp(e.begin)} - {stringifyTimestamp(e.end)}
+							</span>
+							<button
+								style={{ fontSize: "0.5rem" }}
+								onClick={async () => {
+									const tabs = await browser.tabs.query({
+										active: true,
+										currentWindow: true,
+									});
+									const tabId = tabs[0]!.id!;
+									await sendMessage("seek", e.begin, { tabId });
+									await sendMessage("play", undefined, { tabId });
+								}}
+							>
+								▶️
+							</button>
 						</div>
 						<div style={{ display: "flex" }}>
 							<div style={{ flex: 1 }}>{e.text1}</div>
