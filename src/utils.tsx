@@ -172,8 +172,8 @@ interface CaptionTrackJson3 {
 
 function convertJson3(data: CaptionTrackJson3): CaptionEntryRaw[] {
 	return data.events.map((e) => {
-		const begin = e.tStartMs;
-		const end = begin + e.dDurationMs;
+		const begin = e.tStartMs / 1000;
+		const end = begin + e.dDurationMs / 1000;
 		const text = e.segs.map((seg) => seg.utf8).join(" ");
 		return { begin, end, text };
 	});
