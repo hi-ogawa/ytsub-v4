@@ -2,7 +2,8 @@ import { defineExtensionMessaging } from "@webext-core/messaging";
 import type { VideoMetadata } from "../../utils";
 
 interface ProtocolMap {
-	fetchMetadata(videoId: string): Promise<VideoMetadata>;
+	fetchMetadata(data: { videoId: string }): Promise<VideoMetadata>;
+	// fetchMetadata(): Promise<VideoMetadata>;
 }
 
 export const { sendMessage, onMessage } =

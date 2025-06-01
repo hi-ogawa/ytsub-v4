@@ -1,55 +1,10 @@
-import { Root } from "./root";
-import "./style.css";
 import ReactDomClient from "react-dom/client";
-import { browser } from "wxt/browser";
-
-// import viteLogo from "/wxt.svg";
-// import typescriptLogo from "../../assets/typescript.svg";
-// import { setupCounter } from "./counter";
-
-// document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-//   <div>
-//     <a href="https://wxt.dev" target="_blank">
-//       <img src="${viteLogo}" class="logo" alt="WXT logo" />
-//     </a>
-//     <a href="https://www.typescriptlang.org/" target="_blank">
-//       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-//     </a>
-//     <h1>WXT + TypeScript</h1>
-//     <div class="card">
-//       <button id="counter" type="button"></button>
-//     </div>
-//     <p class="read-the-docs">
-//       Click on the WXT and TypeScript logos to learn more
-//     </p>
-//   </div>
-// `;
-
-// setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
+import { Root } from "./root";
 
 async function main() {
-	const rootDom = document.querySelector("#root")!;
-	const root = ReactDomClient.createRoot(rootDom);
-	root.render(<Root />);
-
-	// TODO: can sidepanel directly talk to content script?
-	const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-	// looks like it can
-	console.log(tabs);
+	const dom = document.querySelector("#root")!;
+	const vdom = <Root />;
+	ReactDomClient.createRoot(dom).render(vdom);
 }
 
 main();
-
-// TODO
-// https://developer.chrome.com/docs/extensions/reference/api/sidePanel
-
-// RPC architecture
-// sidepanel
-// -
-//
-// background
-// - just proxy
-//
-// content
-// - video player
-// - metadata api

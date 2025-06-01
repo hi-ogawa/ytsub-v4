@@ -4,11 +4,8 @@ async function main() {
 	console.log("Hello background!", { id: browser.runtime.id });
 
 	// https://developer.chrome.com/docs/extensions/reference/api/sidePanel
-
 	// https://github.com/GoogleChrome/chrome-extensions-samples/blob/20d36c778028f25fb139b83fdd9910b530bd9ea2/functional-samples/cookbook.sidepanel-site-specific/service-worker.js
-	// chrome.sidePanel
-	//   .setPanelBehavior({ openPanelOnActionClick: true })
-	//   .catch((error) => console.error(error));
+	await browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 	// chrome.tabs.onActivated.addListener(async (activeInfo) => {
 	//   const tab = await chrome.tabs.get(activeInfo.tabId);

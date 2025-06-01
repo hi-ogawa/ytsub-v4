@@ -1,3 +1,4 @@
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "wxt";
 
 export default defineConfig({
@@ -10,4 +11,7 @@ export default defineConfig({
 		// (manually load unpacked extension .output/chrome-mv3-dev)
 		disabled: true,
 	},
+	vite: () => ({
+		plugins: [react()],
+	}),
 });

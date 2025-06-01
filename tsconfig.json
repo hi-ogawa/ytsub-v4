@@ -1,6 +1,7 @@
 {
 	"extends": "@tsconfig/strictest/tsconfig.json",
 	"compilerOptions": {
+		"noImplicitReturns": false,
 		"verbatimModuleSyntax": true,
 		"exactOptionalPropertyTypes": false,
 		"checkJs": false,
