@@ -5,7 +5,7 @@
 		"exactOptionalPropertyTypes": false,
 		"checkJs": false,
 		"noEmit": true,
-		"types": ["@types/chrome", "vite/client"],
+		"types": ["vite/client"],
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"target": "ESNext",
