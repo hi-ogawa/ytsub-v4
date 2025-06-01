@@ -1,5 +1,5 @@
-import type { VideoMetadata } from "@/utils";
 import { defineExtensionMessaging } from "@webext-core/messaging";
+import type { VideoMetadata } from "@/utils";
 
 interface ProtocolMap {
 	fetchMetadata(videoId: string): Promise<VideoMetadata>;
@@ -7,3 +7,7 @@ interface ProtocolMap {
 
 export const { sendMessage, onMessage } =
 	defineExtensionMessaging<ProtocolMap>();
+
+// service
+// getActiveVideo()
+// fetchMetadata()

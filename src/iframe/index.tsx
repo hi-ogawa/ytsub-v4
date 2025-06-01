@@ -1,7 +1,7 @@
 import {
-	type TinyRpcProxy,
 	messagePortClientAdapter,
 	proxyTinyRpc,
+	type TinyRpcProxy,
 } from "@hiogawa/tiny-rpc";
 import { tinyassert } from "@hiogawa/utils";
 import React from "react";

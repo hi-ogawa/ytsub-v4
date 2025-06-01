@@ -1,6 +1,7 @@
 import "./style.css";
-import typescriptLogo from "@/assets/typescript.svg";
+import { browser } from "wxt/browser";
 import viteLogo from "/wxt.svg";
+import typescriptLogo from "../../assets/typescript.svg";
 import { setupCounter } from "./counter";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
