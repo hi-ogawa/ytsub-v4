@@ -46,24 +46,6 @@ export const DUMMY_VIDEO_METADATA: VideoMetadata = {
 	},
 };
 
-export interface CaptionConfig {
-	id: string;
-	translation?: string;
-}
-
-export interface CaptionConfigOption {
-	name: string;
-	captionConfig: CaptionConfig;
-}
-
-export interface CaptionConfigOptions {
-	captions: CaptionConfigOption[];
-	translationGroups: {
-		name: string;
-		translations: CaptionConfigOption[];
-	}[];
-}
-
 export interface CaptionEntry {
 	index: number;
 	begin: number;
@@ -190,7 +172,7 @@ function mergeCaptionEntryPairs(
 	entries2: CaptionEntryRaw[],
 ): CaptionEntry[] {
 	// try simple case first
-	const found = mergeTtmlEntriesSimple(entries1, entries2);
+	const found = mergeCaptionEntryPairsSimple(entries1, entries2);
 	if (found) {
 		return found;
 	}
@@ -222,7 +204,7 @@ function mergeCaptionEntryPairs(
 }
 
 // handle sane and simplest case where all intervals share the same timestamp interval
-function mergeTtmlEntriesSimple(
+function mergeCaptionEntryPairsSimple(
 	entries1: CaptionEntryRaw[],
 	entries2: CaptionEntryRaw[],
 ): CaptionEntry[] | undefined {

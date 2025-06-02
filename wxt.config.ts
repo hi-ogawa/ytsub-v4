@@ -5,6 +5,12 @@ export default defineConfig({
 	srcDir: "./src",
 	manifest: {
 		permissions: ["activeTab"],
+		web_accessible_resources: [
+			{
+				resources: ["content-iframe.html"],
+				matches: ["https://www.youtube.com/*"],
+			},
+		],
 	},
 	webExt: {
 		// no browser open

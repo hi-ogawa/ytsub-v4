@@ -6,6 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",
+		"test": "vitest",
 		"lint": "biome check --write .",
 		"lint-check": "biome check ."
 	},
@@ -23,6 +24,7 @@
 		"@webext-core/messaging": "^2.2.0",
 		"typescript": "^5.8.3",
 		"vite": "^6.3.5",
+		"vitest": "^3.1.4",
 		"web-ext": "^8.7.1",
 		"wxt": "^0.20.6"
 	},
