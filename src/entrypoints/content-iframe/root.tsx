@@ -4,20 +4,20 @@ import {
 	useQuery,
 } from "@tanstack/react-query";
 import React from "react";
-import { browser } from "wxt/browser";
 import { cls, SelectWrapper } from "../../ui";
 import {
 	type CaptionEntry,
 	type CaptionTrackMetadata,
 	captionTrackName,
 	fetchCaptionEntries,
-	parseVideoId,
 	stringifyTimestamp,
 	type VideoMetadata,
 } from "../../utils";
 import { sendMessage } from "../content/rpc";
 
 const queryClient = new QueryClient();
+
+const tabId = Number(new URL(window.location.href).searchParams.get("tabId"));
 
 export function Root() {
 	return (
@@ -29,8 +29,11 @@ export function Root() {
 
 function RootInner() {
 	const query = useQuery({
-		queryKey: ["videoMetadata"],
-		queryFn: getVideoMetadata,
+		queryKey: ["fetchMetadata"],
+		queryFn: async () => {
+			const result = await sendMessage("fetchMetadata", undefined, { tabId });
+			return result;
+		},
 	});
 
 	return (
@@ -93,20 +96,30 @@ function MainView(props: { metadata: VideoMetadata }) {
 }
 
 function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
-	// TODO: highlight currently playing entry
+	const query = useQuery({
+		queryKey: ["getState"],
+		queryFn: async () => {
+			const result = await sendMessage("getState", undefined, { tabId });
+			return result;
+		},
+		initialData: { playing: false, time: 0, mounted: true },
+		refetchInterval: 200,
+	});
+	const state = query.data;
 
 	return (
 		<div className="flex flex-col gap-2 text-sm">
 			{props.captionEntries.map((e) => (
 				<div
 					key={e.index}
-					className="flex flex-col gap-1 p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 border-1 border-gray-300 cursor-pointer"
+					className={cls(
+						"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
+						// TODO: pick closest one if none matches
+						e.begin <= state.time && state.time <= e.end
+							? "bg-green-100 hover:bg-green-200 border-green-300"
+							: "bg-gray-100 hover:bg-gray-200 border-gray-300",
+					)}
 					onClick={async () => {
-						const tabs = await browser.tabs.query({
-							active: true,
-							currentWindow: true,
-						});
-						const tabId = tabs[0]!.id!;
 						await sendMessage("play", e.begin, { tabId });
 					}}
 				>
@@ -124,23 +137,4 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 			))}
 		</div>
 	);
-}
-
-async function getVideoMetadata(): Promise<VideoMetadata | undefined> {
-	const tabs = await browser.tabs.query({
-		active: true,
-		currentWindow: true,
-	});
-	const tab = tabs[0];
-	if (tab && tab.url && tab.id) {
-		const videoId = parseVideoId(tab.url);
-		if (videoId) {
-			const result = await sendMessage(
-				"fetchMetadata",
-				{ videoId },
-				{ tabId: tab.id },
-			);
-			return result;
-		}
-	}
 }

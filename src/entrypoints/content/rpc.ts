@@ -17,7 +17,7 @@ interface ProtocolMap {
 	play(time: number): void;
 
 	// youtube api proxy
-	fetchMetadata(data: { videoId: string }): Promise<VideoMetadata>;
+	fetchMetadata(): Promise<VideoMetadata>;
 }
 
 export const { sendMessage, onMessage } =

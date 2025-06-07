@@ -1,6 +1,7 @@
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
-import { fetchMetadataJson } from "../../utils";
+import { fetchMetadataJson, parseVideoId } from "../../utils";
+import { sendMessage } from "../background/rpc";
 import { onMessage } from "./rpc";
 
 class Service {
@@ -15,8 +16,13 @@ class Service {
 }
 
 export async function main(ctx: ContentScriptContext) {
+	const videoId = parseVideoId(window.location.href);
+	if (!videoId) return;
+
+	const { tabId } = await sendMessage("initContent", undefined);
+
 	const ui = createIframeUi(ctx, {
-		page: "content-iframe.html",
+		page: `content-iframe.html?tabId=${tabId}`,
 		position: "inline",
 		anchor: "body",
 		onMount: (wrapper, iframe) => {
@@ -49,7 +55,7 @@ export async function main(ctx: ContentScriptContext) {
 
 	const service = new Service();
 
-	onMessage("fetchMetadata", async ({ data: { videoId } }) => {
+	onMessage("fetchMetadata", async () => {
 		return fetchMetadataJson(videoId);
 	});
 	onMessage("play", ({ data }) => service.play(data));
