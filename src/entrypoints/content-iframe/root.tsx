@@ -1,3 +1,8 @@
+import {
+	QueryClient,
+	QueryClientProvider,
+	useQuery,
+} from "@tanstack/react-query";
 import React from "react";
 import { browser } from "wxt/browser";
 import { cls, SelectWrapper } from "../../ui";
@@ -12,22 +17,30 @@ import {
 } from "../../utils";
 import { sendMessage } from "../content/rpc";
 
+const queryClient = new QueryClient();
+
 export function Root() {
-	const [metadata, setMetadata] = React.useState<VideoMetadata>();
+	return (
+		<QueryClientProvider client={queryClient}>
+			<RootInner />
+		</QueryClientProvider>
+	);
+}
+
+function RootInner() {
+	const query = useQuery({
+		queryKey: ["videoMetadata"],
+		queryFn: getVideoMetadata,
+	});
 
 	return (
 		<div className="p-2 flex flex-col gap-2">
-			{/* TODO: remove and just auto fetch videoMetadata */}
-			<button
-				className="btn btn-sm"
-				onClick={async () => {
-					const metadata = await getVideoMetadata();
-					setMetadata(metadata);
-				}}
-			>
-				{metadata ? "Refresh" : "Load"}
-			</button>
-			{metadata && <MainView metadata={metadata} />}
+			{query.isError && (
+				<div role="alert" className="alert alert-error alert-soft text-sm">
+					<span>Failed to load captions data</span>
+				</div>
+			)}
+			{query.data && <MainView metadata={query.data} />}
 		</div>
 	);
 }
