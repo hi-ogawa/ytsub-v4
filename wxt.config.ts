@@ -15,7 +15,7 @@ export default defineConfig({
 		],
 	}),
 	webExt: {
-		// no browser open
+		// disable opening browser on dev
 		// (manually load unpacked extension .output/chrome-mv3-dev)
 		disabled: true,
 	},
