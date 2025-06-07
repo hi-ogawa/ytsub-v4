@@ -1,0 +1,25 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm i
+      - run: pnpm build
+      - run: bash scripts/package.sh
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .output/ytsub
