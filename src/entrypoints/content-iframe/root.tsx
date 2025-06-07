@@ -15,18 +15,16 @@ export function Root() {
 	const [metadata, setMetadata] = React.useState<VideoMetadata>();
 
 	return (
-		<div>
-			<h4>content-iframe</h4>
-			<div>
-				<button
-					onClick={async () => {
-						const metadata = await getVideoMetadata();
-						setMetadata(metadata);
-					}}
-				>
-					{metadata ? "Refresh" : "Load"}
-				</button>
-			</div>
+		<div className="p-2 flex flex-col gap-2">
+			<button
+				className="btn btn-sm"
+				onClick={async () => {
+					const metadata = await getVideoMetadata();
+					setMetadata(metadata);
+				}}
+			>
+				{metadata ? "Refresh" : "Load"}
+			</button>
 			{metadata && <MainView metadata={metadata} />}
 		</div>
 	);
@@ -44,33 +42,36 @@ function MainView(props: { metadata: VideoMetadata }) {
 	}
 
 	return (
-		<div>
-			<SelectWrapper
-				value={lang1}
-				options={captionTracks}
-				onChange={(e) => setLang1(e)}
-				labelFn={(e) => e?.vssId}
-			/>
-			<SelectWrapper
-				value={lang2}
-				options={captionTracks}
-				onChange={(e) => setLang2(e)}
-				labelFn={(e) => e?.vssId}
-			/>
+		<div className="flex flex-col gap-2">
+			<div className="flex gap-2">
+				<SelectWrapper
+					className="select"
+					value={lang1}
+					options={captionTracks}
+					onChange={(e) => setLang1(e)}
+					labelFn={(e) => e?.languageCode}
+				/>
+				<SelectWrapper
+					className="select"
+					value={lang2}
+					options={captionTracks}
+					onChange={(e) => setLang2(e)}
+					labelFn={(e) => e?.languageCode}
+				/>
+			</div>
 			{lang1 && lang2 && (
-				<div>
-					<button
-						onClick={async () => {
-							const result = await fetchCaptionEntries({
-								language1: lang1,
-								language2: lang2,
-							});
-							setCaptionEntries(result);
-						}}
-					>
-						Load captions
-					</button>
-				</div>
+				<button
+					className="btn btn-sm"
+					onClick={async () => {
+						const result = await fetchCaptionEntries({
+							language1: lang1,
+							language2: lang2,
+						});
+						setCaptionEntries(result);
+					}}
+				>
+					Load captions
+				</button>
 			)}
 			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
 		</div>

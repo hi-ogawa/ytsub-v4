@@ -1,3 +1,4 @@
+import "../../styles.css";
 import ReactDomClient from "react-dom/client";
 import { Root } from "./root";
 
