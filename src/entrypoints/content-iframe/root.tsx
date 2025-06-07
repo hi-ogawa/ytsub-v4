@@ -34,6 +34,8 @@ function RootInner() {
 			const result = await sendMessage("fetchMetadata", undefined, { tabId });
 			return result;
 		},
+		staleTime: Infinity,
+		gcTime: Infinity,
 	});
 
 	return (
