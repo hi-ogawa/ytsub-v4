@@ -134,14 +134,12 @@ async function getVideoMetadata(): Promise<VideoMetadata | undefined> {
 	const tab = tabs[0];
 	if (tab && tab.url && tab.id) {
 		const videoId = parseVideoId(tab.url);
-		console.log({ videoId });
 		if (videoId) {
 			const result = await sendMessage(
 				"fetchMetadata",
 				{ videoId },
 				{ tabId: tab.id },
 			);
-			console.log({ result });
 			return result;
 		}
 	}
