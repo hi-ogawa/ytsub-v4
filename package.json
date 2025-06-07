@@ -19,6 +19,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.0.0-beta.5",
 		"@hiogawa/utils": "^1.7.0",
+		"@iconify-json/ri": "^1.2.5",
+		"@iconify/tailwind4": "^1.0.6",
 		"@tailwindcss/vite": "^4.1.8",
 		"@tsconfig/strictest": "^2.0.5",
 		"@vitejs/plugin-react": "^4.5.0",

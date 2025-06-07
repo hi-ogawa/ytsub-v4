@@ -27,3 +27,6 @@ export function SelectWrapper<T>({
 		</select>
 	);
 }
+
+export const cls = (...classes: (string | undefined | boolean)[]) =>
+	classes.filter(Boolean).join(" ");

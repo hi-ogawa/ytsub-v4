@@ -1,6 +1,6 @@
 import React from "react";
 import { browser } from "wxt/browser";
-import { SelectWrapper } from "../../ui";
+import { cls, SelectWrapper } from "../../ui";
 import {
 	type CaptionEntry,
 	type CaptionTrackMetadata,
@@ -17,6 +17,7 @@ export function Root() {
 
 	return (
 		<div className="p-2 flex flex-col gap-2">
+			{/* TODO: remove and just auto fetch videoMetadata */}
 			<button
 				className="btn btn-sm"
 				onClick={async () => {
@@ -44,7 +45,7 @@ function MainView(props: { metadata: VideoMetadata }) {
 
 	return (
 		<>
-			<div className="flex gap-2">
+			<div className="flex gap-2 items-stretch">
 				<SelectWrapper
 					className="select"
 					value={lang1}
@@ -59,11 +60,10 @@ function MainView(props: { metadata: VideoMetadata }) {
 					onChange={(e) => setLang2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
-			</div>
-			{lang1 && lang2 && (
 				<button
-					className="btn btn-sm"
+					className={cls(`btn p-2`, !(lang1 && lang2) && "btn-disabled")}
 					onClick={async () => {
+						if (!lang1 || !lang2) return;
 						const result = await fetchCaptionEntries({
 							language1: lang1,
 							language2: lang2,
@@ -71,9 +71,9 @@ function MainView(props: { metadata: VideoMetadata }) {
 						setCaptionEntries(result);
 					}}
 				>
-					Load Captions
+					<span className="icon-[ri--play-line] text-lg"></span>
 				</button>
-			)}
+			</div>
 			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
 		</>
 	);
@@ -87,7 +87,7 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 			{props.captionEntries.map((e) => (
 				<div
 					key={e.index}
-					className="flex flex-col gap-1 p-2 rounded-md bg-gray-100 hover:bg-gray-200 border-1 border-gray-300 cursor-pointer"
+					className="flex flex-col gap-1 p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 border-1 border-gray-300 cursor-pointer"
 					onClick={async () => {
 						const tabs = await browser.tabs.query({
 							active: true,
@@ -97,16 +97,15 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 						await sendMessage("play", e.begin, { tabId });
 					}}
 				>
-					<div
-						style={{ marginBottom: "0.1rem", display: "flex", gap: "0.5rem" }}
-					>
+					<div className="text-xs text-gray-500">
 						<span>
 							{stringifyTimestamp(e.begin)} - {stringifyTimestamp(e.end)}
 						</span>
 					</div>
-					<div style={{ display: "flex" }}>
-						<div style={{ flex: 1 }}>{e.text1}</div>
-						<div style={{ flex: 1 }}>{e.text2}</div>
+					<div className="flex gap-1.5">
+						<div className="flex-1">{e.text1}</div>
+						<span className="border-l border-gray-300"></span>
+						<div className="flex-1">{e.text2}</div>
 					</div>
 				</div>
 			))}
