@@ -54,7 +54,7 @@ function RootInner() {
 			>
 				{state?.mounted ? "Hide Caption" : "Show Caption"}
 			</button>
-			{!state && (
+			{!query.isLoading && !state && (
 				<div role="alert" className="alert alert-error alert-soft text-sm mt-2">
 					<span>This extension cannot be used on the current page.</span>
 				</div>
