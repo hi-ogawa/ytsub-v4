@@ -13,8 +13,6 @@ class Service {
 }
 
 async function main() {
-	console.log("Hello content.");
-
 	const service = new Service();
 
 	onMessage("fetchMetadata", async ({ data: { videoId } }) => {
