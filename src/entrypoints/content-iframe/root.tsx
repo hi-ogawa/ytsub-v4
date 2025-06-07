@@ -106,6 +106,7 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 		refetchInterval: 200,
 	});
 	const state = query.data;
+	const currentEntry = findCurrentEntry(props.captionEntries, state.time);
 
 	return (
 		<div className="flex flex-col gap-2 text-sm">
@@ -114,8 +115,7 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 					key={e.index}
 					className={cls(
 						"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
-						// TODO: pick closest one if none matches
-						e.begin <= state.time && state.time <= e.end
+						e === currentEntry
 							? "bg-green-100 hover:bg-green-200 border-green-300"
 							: "bg-gray-100 hover:bg-gray-200 border-gray-300",
 					)}
@@ -137,4 +137,17 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 			))}
 		</div>
 	);
+}
+
+// better heuristics than simple `begin <= time && time <= end`
+function findCurrentEntry(
+	entries: CaptionEntry[],
+	time: number,
+): CaptionEntry | undefined {
+	for (let i = entries.length - 1; i >= 0; i--) {
+		if (entries[i]!.begin <= time) {
+			return entries[i];
+		}
+	}
+	return;
 }
