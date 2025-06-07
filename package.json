@@ -7,6 +7,7 @@
 	"scripts": {
 		"dev": "wxt",
 		"build": "wxt zip",
+		"release": "bash scripts/tag.sh",
 		"test": "vitest",
 		"tsc": "tsc -b",
 		"tsc-dev": "tsc -b --watch --preserveWatchOutput",
