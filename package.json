@@ -6,7 +6,10 @@
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",
+		"build": "wxt build",
 		"test": "vitest",
+		"tsc": "tsc -b",
+		"tsc-dev": "tsc -b --watch --preserveWatchOutput",
 		"lint": "biome check --write .",
 		"lint-check": "biome check ."
 	},
