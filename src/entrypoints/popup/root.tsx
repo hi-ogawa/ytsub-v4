@@ -18,7 +18,7 @@ export function Root() {
 	);
 }
 
-export function RootInner() {
+function RootInner() {
 	const query = useQuery({
 		queryKey: ["currentTab"],
 		queryFn: async () => {
