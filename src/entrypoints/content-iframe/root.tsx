@@ -96,6 +96,7 @@ function MainView(props: { metadata: VideoMetadata }) {
 }
 
 // TODO: virtual scroll list
+// - test 50 min video https://www.youtube.com/watch?v=V07nRDc1J18
 function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	const query = useQuery({
 		queryKey: ["getState"],
