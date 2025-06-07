@@ -30,6 +30,12 @@ export type CaptionTrackMetadata = {
 	};
 };
 
+export function captionTrackName(metadata: CaptionTrackMetadata): string {
+	return (
+		metadata.name.runs.map((r) => r.text).join("") || metadata.languageCode
+	);
+}
+
 export const DUMMY_VIDEO_METADATA: VideoMetadata = {
 	videoDetails: {
 		videoId: "(videoId)",

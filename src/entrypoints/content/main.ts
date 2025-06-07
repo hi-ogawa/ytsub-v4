@@ -6,16 +6,9 @@ class Service {
 		return document.querySelector<HTMLVideoElement>("video.html5-main-video")!;
 	}
 
-	play() {
-		this.video.play();
-	}
-
-	pause() {
-		this.video.pause();
-	}
-
-	seek(time: number) {
+	play(time: number) {
 		this.video.currentTime = time;
+		setTimeout(() => this.video.play());
 	}
 }
 
@@ -27,9 +20,7 @@ async function main() {
 	onMessage("fetchMetadata", async ({ data: { videoId } }) => {
 		return fetchMetadataJson(videoId);
 	});
-	onMessage("play", () => service.play());
-	onMessage("pause", () => service.pause());
-	onMessage("seek", ({ data }) => service.seek(data));
+	onMessage("play", ({ data }) => service.play(data));
 }
 
 main();

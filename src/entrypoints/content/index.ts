@@ -20,8 +20,8 @@ export default defineContentScript({
 				wrapper.style.position = "fixed";
 				wrapper.style.top = "5vh";
 				wrapper.style.height = "90vh";
-				wrapper.style.right = "20px";
-				wrapper.style.width = "400px";
+				wrapper.style.right = "10px";
+				wrapper.style.width = "480px";
 				wrapper.style.zIndex = "100000";
 				iframe.style.width = "100%";
 				iframe.style.height = "100%";

@@ -4,6 +4,7 @@ import { SelectWrapper } from "../../ui";
 import {
 	type CaptionEntry,
 	type CaptionTrackMetadata,
+	captionTrackName,
 	fetchCaptionEntries,
 	parseVideoId,
 	stringifyTimestamp,
@@ -38,25 +39,25 @@ function MainView(props: { metadata: VideoMetadata }) {
 	const captionTracks =
 		props.metadata.captions?.playerCaptionsTracklistRenderer.captionTracks;
 	if (!captionTracks) {
-		return <div>No captions available :(</div>;
+		return <div>No captions available.</div>;
 	}
 
 	return (
-		<div className="flex flex-col gap-2">
+		<>
 			<div className="flex gap-2">
 				<SelectWrapper
 					className="select"
 					value={lang1}
-					options={captionTracks}
+					options={[undefined, ...captionTracks]}
 					onChange={(e) => setLang1(e)}
-					labelFn={(e) => e?.languageCode}
+					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<SelectWrapper
 					className="select"
 					value={lang2}
-					options={captionTracks}
+					options={[undefined, ...captionTracks]}
 					onChange={(e) => setLang2(e)}
-					labelFn={(e) => e?.languageCode}
+					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 			</div>
 			{lang1 && lang2 && (
@@ -70,55 +71,45 @@ function MainView(props: { metadata: VideoMetadata }) {
 						setCaptionEntries(result);
 					}}
 				>
-					Load captions
+					Load Captions
 				</button>
 			)}
 			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
-		</div>
+		</>
 	);
 }
 
 function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
+	// TODO: highlight currently playing entry
+
 	return (
-		<div>
-			<div>
-				{props.captionEntries.map((e) => (
+		<div className="flex flex-col gap-2 text-sm">
+			{props.captionEntries.map((e) => (
+				<div
+					key={e.index}
+					className="flex flex-col gap-1 p-2 rounded-md bg-gray-100 hover:bg-gray-200 border-1 border-gray-300 cursor-pointer"
+					onClick={async () => {
+						const tabs = await browser.tabs.query({
+							active: true,
+							currentWindow: true,
+						});
+						const tabId = tabs[0]!.id!;
+						await sendMessage("play", e.begin, { tabId });
+					}}
+				>
 					<div
-						key={e.index}
-						style={{
-							border: "1px solid #0004",
-							margin: "0.5rem",
-							padding: "0.2rem",
-						}}
+						style={{ marginBottom: "0.1rem", display: "flex", gap: "0.5rem" }}
 					>
-						<div
-							style={{ marginBottom: "0.1rem", display: "flex", gap: "0.5rem" }}
-						>
-							<span>
-								{stringifyTimestamp(e.begin)} - {stringifyTimestamp(e.end)}
-							</span>
-							<button
-								style={{ fontSize: "0.5rem" }}
-								onClick={async () => {
-									const tabs = await browser.tabs.query({
-										active: true,
-										currentWindow: true,
-									});
-									const tabId = tabs[0]!.id!;
-									await sendMessage("seek", e.begin, { tabId });
-									await sendMessage("play", undefined, { tabId });
-								}}
-							>
-								▶️
-							</button>
-						</div>
-						<div style={{ display: "flex" }}>
-							<div style={{ flex: 1 }}>{e.text1}</div>
-							<div style={{ flex: 1 }}>{e.text2}</div>
-						</div>
+						<span>
+							{stringifyTimestamp(e.begin)} - {stringifyTimestamp(e.end)}
+						</span>
 					</div>
-				))}
-			</div>
+					<div style={{ display: "flex" }}>
+						<div style={{ flex: 1 }}>{e.text1}</div>
+						<div style={{ flex: 1 }}>{e.text2}</div>
+					</div>
+				</div>
+			))}
 		</div>
 	);
 }
