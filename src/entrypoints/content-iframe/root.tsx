@@ -95,6 +95,7 @@ function MainView(props: { metadata: VideoMetadata }) {
 	);
 }
 
+// TODO: virtual scroll list
 function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	const query = useQuery({
 		queryKey: ["getState"],
