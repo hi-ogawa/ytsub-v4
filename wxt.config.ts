@@ -2,9 +2,12 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "wxt";
 
+const isBuild = process.argv.slice(2).includes("build");
+
 export default defineConfig({
 	srcDir: "./src",
 	manifest: {
+		name: isBuild ? "ytsub" : "ytsub (dev)",
 		permissions: ["activeTab"],
 		web_accessible_resources: [
 			{
