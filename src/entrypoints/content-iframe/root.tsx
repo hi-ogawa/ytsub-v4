@@ -124,6 +124,9 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 							: "bg-gray-100 hover:bg-gray-200 border-gray-300",
 					)}
 					onClick={async () => {
+						const selection = window.getSelection();
+						if (!selection || !selection.isCollapsed) return;
+
 						await sendMessage("play", e.begin, { tabId });
 					}}
 				>
