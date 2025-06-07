@@ -19,6 +19,7 @@ export default defineConfig({
 		// (manually load unpacked extension .output/chrome-mv3-dev)
 		disabled: true,
 	},
+	modules: ["@wxt-dev/auto-icons"],
 	vite: () => ({
 		plugins: [react(), tailwindcss()],
 	}),
