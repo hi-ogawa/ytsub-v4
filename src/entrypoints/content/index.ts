@@ -7,16 +7,21 @@ export default defineContentScript({
 		ctx;
 		import("./main");
 
+		// TODO
+		// - how to close and open?
+		//   - use popup ui to control?
+		// - how to resize?
+
 		const ui = createIframeUi(ctx, {
 			page: "content-iframe.html",
 			position: "inline",
 			anchor: "body",
 			onMount: (wrapper, iframe) => {
 				wrapper.style.position = "fixed";
-				wrapper.style.top = "20px";
+				wrapper.style.top = "5vh";
+				wrapper.style.height = "90vh";
 				wrapper.style.right = "20px";
-				wrapper.style.width = "300px";
-				wrapper.style.height = "800px";
+				wrapper.style.width = "400px";
 				wrapper.style.zIndex = "100000";
 				iframe.style.width = "100%";
 				iframe.style.height = "100%";
