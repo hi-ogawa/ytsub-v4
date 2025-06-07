@@ -2,6 +2,7 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { fetchMetadataJson } from "../../utils";
 import { onMessage } from "./rpc";
+import { tinyassert } from "@hiogawa/utils";
 
 class Service {
 	get video() {
@@ -30,6 +31,17 @@ export async function main(ctx: ContentScriptContext) {
 			iframe.style.height = "100%";
 			iframe.style.border = "none";
 			mounted = true;
+
+			const channel = new MessageChannel();
+			// exposeTinyRpc({
+			// 	routes: new RpcHandler(),
+			// 	adapter: messagePortServerAdapter({
+			// 		port: channel.port1,
+			// 	}),
+			// });
+			channel.port1.start();
+			tinyassert(iframe.contentWindow);
+			iframe.contentWindow!.postMessage("init-rpc", "*", [channel.port2]);
 		},
 		onRemove() {
 			mounted = false;
