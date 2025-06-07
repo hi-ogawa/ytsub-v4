@@ -18,8 +18,7 @@ jobs:
       - run: corepack enable
       - run: pnpm i
       - run: pnpm build
-      - run: bash scripts/package.sh
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            .output/ytsub
+            .output/*.zip
