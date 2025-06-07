@@ -119,7 +119,6 @@ async function getVideoMetadata(): Promise<VideoMetadata | undefined> {
 		currentWindow: true,
 	});
 	const tab = tabs[0];
-	console.log({ tab });
 	if (tab && tab.url && tab.id) {
 		const videoId = parseVideoId(tab.url);
 		console.log({ videoId });
