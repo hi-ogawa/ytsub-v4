@@ -21,15 +21,15 @@ const searchParams = new URL(window.location.href).searchParams;
 const tabId = Number(searchParams.get("tabId"));
 const videoId = String(searchParams.get("videoId"));
 
-type VideoCache = {
-	lastData?: {
-		lang1: CaptionTrackMetadata;
-		lang2: CaptionTrackMetadata;
+type VideoStorageData = {
+	lastSelected?: {
+		language1: CaptionTrackMetadata;
+		language2: CaptionTrackMetadata;
 		captionEntries: CaptionEntry[];
 	};
 };
 
-const videoCacheStorage = storage.defineItem<VideoCache>(
+const videoStorage = storage.defineItem<VideoStorageData>(
 	`local:video-${videoId}`,
 	{
 		fallback: {},
@@ -49,8 +49,8 @@ function RootInner() {
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
 			const metadata = await sendMessage("fetchMetadata", undefined, { tabId });
-			const cache = await videoCacheStorage.getValue();
-			return { metadata, cache };
+			const storageData = await videoStorage.getValue();
+			return { metadata, storageData };
 		},
 		staleTime: Infinity,
 		gcTime: Infinity,
@@ -79,7 +79,10 @@ function RootInner() {
 						);
 					}
 					return (
-						<MainView captionTracks={captionTracks} cache={query.data.cache} />
+						<MainView
+							captionTracks={captionTracks}
+							storageData={query.data.storageData}
+						/>
 					);
 				})()}
 		</div>
@@ -88,19 +91,19 @@ function RootInner() {
 
 function MainView(props: {
 	captionTracks: CaptionTrackMetadata[];
-	cache: VideoCache;
+	storageData: VideoStorageData;
 }) {
 	const captionTracks = props.captionTracks;
-	const lastData = props.cache.lastData;
-	const [lang1, setLang1] = React.useState(
+	const lastData = props.storageData.lastSelected;
+	const [language1, setLanauge2] = React.useState(
 		() =>
-			lastData?.lang1 &&
-			captionTracks.find((e) => e.vssId === lastData.lang1.vssId),
+			lastData?.language1 &&
+			captionTracks.find((e) => e.vssId === lastData.language1.vssId),
 	);
-	const [lang2, setLang2] = React.useState(
+	const [language2, setLanguage2] = React.useState(
 		() =>
-			lastData?.lang2 &&
-			captionTracks.find((e) => e.vssId === lastData.lang2.vssId),
+			lastData?.language2 &&
+			captionTracks.find((e) => e.vssId === lastData.language2.vssId),
 	);
 	const [captionEntries, setCaptionEntries] = React.useState(
 		lastData?.captionEntries,
@@ -111,32 +114,35 @@ function MainView(props: {
 			<div className="flex gap-2 items-stretch">
 				<SelectWrapper
 					className="select"
-					value={lang1}
+					value={language1}
 					options={[undefined, ...captionTracks]}
-					onChange={(e) => setLang1(e)}
+					onChange={(e) => setLanauge2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<SelectWrapper
 					className="select"
-					value={lang2}
+					value={language2}
 					options={[undefined, ...captionTracks]}
-					onChange={(e) => setLang2(e)}
+					onChange={(e) => setLanguage2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<button
-					className={cls(`btn p-2`, !(lang1 && lang2) && "btn-disabled")}
+					className={cls(
+						`btn p-2`,
+						!(language1 && language2) && "btn-disabled",
+					)}
 					onClick={async () => {
-						if (!lang1 || !lang2) return;
-						const result = await fetchCaptionEntries({
-							language1: lang1,
-							language2: lang2,
+						if (!language1 || !language2) return;
+						const captionEntries = await fetchCaptionEntries({
+							language1,
+							language2,
 						});
-						setCaptionEntries(result);
-						videoCacheStorage.setValue({
-							lastData: {
-								lang1,
-								lang2,
-								captionEntries: result,
+						setCaptionEntries(captionEntries);
+						videoStorage.setValue({
+							lastSelected: {
+								language1,
+								language2,
+								captionEntries,
 							},
 						});
 					}}
