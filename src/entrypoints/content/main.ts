@@ -48,7 +48,7 @@ export class ContentService {
 		const video = this.getVideo();
 		if (video) {
 			video.currentTime = time;
-			setTimeout(() => video.play());
+			// setTimeout(() => video.play());
 		}
 	}
 
