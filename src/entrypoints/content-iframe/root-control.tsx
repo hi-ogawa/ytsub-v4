@@ -6,13 +6,11 @@ const rpc = createContentServiceClient(tabId);
 
 export function RootControl() {
 	return (
-		<div className="w-full h-full">
-			<button
-				className={`btn btn-sm w-full h-full rounded-xl border-1`}
-				onClick={() => rpc.showUI()}
-			>
-				<span className="icon-[ri--translate-2] text-2xl bg-green-600"></span>
-			</button>
-		</div>
+		<button
+			className={`btn btn-sm w-full h-full rounded-full border-0 bg-green-500 hover:brightness-105`}
+			onClick={() => rpc.showUI()}
+		>
+			<span className="icon-[ri--translate-2] size-[25px] bg-white"></span>
+		</button>
 	);
 }
