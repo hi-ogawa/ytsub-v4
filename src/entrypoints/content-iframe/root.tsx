@@ -17,9 +17,9 @@ import { createContentServiceClient } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
-const searchParams = new URL(window.location.href).searchParams;
-const tabId = Number(searchParams.get("tabId"));
-const videoId = String(searchParams.get("videoId"));
+const uiParams = new URL(window.location.href).searchParams;
+const tabId = Number(uiParams.get("tabId"));
+const videoId = String(uiParams.get("videoId"));
 
 const rpc = createContentServiceClient(tabId);
 
@@ -59,7 +59,7 @@ function RootInner() {
 	});
 
 	return (
-		<div className="p-2 flex flex-col gap-2 h-full">
+		<div className="p-2 flex flex-col gap-2 h-full bg-white rounded">
 			{query.isError && (
 				<div role="alert" className="alert alert-error alert-soft text-sm">
 					<span>Failed to load captions</span>

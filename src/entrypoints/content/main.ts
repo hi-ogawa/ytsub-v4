@@ -6,6 +6,7 @@ import { onMessage, registerContentService } from "./rpc";
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
+	controlUI: ReturnType<typeof createIframeUi>;
 
 	constructor(
 		public ctx: ContentScriptContext,
@@ -18,6 +19,24 @@ export class ContentService {
 				this.hideUI();
 			}
 		});
+
+		this.controlUI = createIframeUi(this.ctx, {
+			page: `content-iframe.html?tabId=${this.tabId}&control=true`,
+			position: "inline",
+			anchor: "body",
+			onMount: (wrapper, iframe) => {
+				wrapper.style.position = "fixed";
+				wrapper.style.height = "50px";
+				wrapper.style.width = "50px";
+				wrapper.style.right = "20px";
+				wrapper.style.bottom = "20px";
+				wrapper.style.zIndex = "100000";
+				iframe.style.width = "100%";
+				iframe.style.height = "100%";
+				iframe.style.border = "none";
+			},
+		});
+		this.controlUI.mount();
 	}
 
 	fetchMetadata(videoId: string) {
@@ -51,6 +70,7 @@ export class ContentService {
 	}
 
 	showUI() {
+		if (this.ui) return;
 		const video = this.getVideo();
 		const { videoId } = this.getPageState();
 		if (!videoId || !video) {
@@ -74,11 +94,14 @@ export class ContentService {
 			},
 		});
 		this.ui.mount();
+		this.controlUI.wrapper.hidden = true;
 	}
 
 	hideUI() {
-		this.ui?.remove();
+		if (!this.ui) return;
+		this.ui.remove();
 		this.ui = undefined;
+		this.controlUI.wrapper.hidden = false;
 	}
 }
 
@@ -111,4 +134,35 @@ export async function main(ctx: ContentScriptContext) {
 	});
 
 	onMessage("play", (e) => service.seek(e.data));
+
+	// const switchUi = await createShadowRootUi(ctx, {
+	// 	name: "ytsub-ui",
+	// 	position: "inline",
+	// 	anchor: "body",
+	// 	// onMount(container, _shadow, shadowHost) {
+	// 	// 	shadowHost.style.position = "fixed";
+	// 	// 	shadowHost.style.zIndex = "100000";
+	// 	// 	shadowHost.style.right = "10px";
+	// 	// 	shadowHost.style.bottom = "10px";
+
+	// 	// 	const app = document.createElement('p');
+	// 	// 	app.textContent = 'Hello world!';
+	// 	// 	container.append(app);
+	// 	// 	container.style.background = "white";
+	// 	// },
+	// 	onMount: (container, _shadow, shadowHost) => {
+	// 		shadowHost.style.position = "fixed";
+	// 		shadowHost.style.zIndex = "100000";
+	// 		shadowHost.style.right = "10px";
+	// 		shadowHost.style.bottom = "10px";
+
+	// 		const root = ReactDomClient.createRoot(container);
+	// 		root.render(<Root />);
+	// 		return { root };
+	// 	},
+	// 	onRemove: (elements) => {
+	// 		elements?.root.unmount();
+	// 	},
+	// });
+	// switchUi.mount();
 }
