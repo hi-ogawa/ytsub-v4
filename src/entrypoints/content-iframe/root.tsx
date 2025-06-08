@@ -247,26 +247,38 @@ function CaptionsView({
 					key={e.index}
 					entry={e}
 					isCurrent={e === currentEntry}
+					isPlaying={state.playing}
 				/>
 			))}
 		</div>
 	);
 }
 
-function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
+function CaptionEntryView(props: {
+	entry: CaptionEntry;
+	isCurrent: boolean;
+	isPlaying: boolean;
+}) {
 	return (
 		<div
 			data-entry-index={props.entry.index}
 			className={cls(
-				"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
+				"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer transition",
 				props.isCurrent
-					? "bg-green-100 hover:bg-green-200 border-green-300"
+					? props.isPlaying
+						? "bg-blue-100 hover:bg-blue-200 border-blue-300"
+						: "bg-green-100 hover:bg-green-200 border-green-300"
 					: "bg-gray-100 hover:bg-gray-200 border-gray-300",
 			)}
 			onClick={async () => {
 				const selection = window.getSelection();
 				if (!selection || !selection.isCollapsed) return;
-				await rpc.seek(props.entry.begin);
+
+				if (props.isCurrent) {
+					await rpc.togglePlay();
+				} else {
+					await rpc.seek(props.entry.begin);
+				}
 			}}
 		>
 			<div className="text-xs text-gray-500">
