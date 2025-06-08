@@ -41,7 +41,7 @@ const videoStorage = storage.defineItem<VideoStorageData>(
 );
 
 const autoScrollStore = new WxtStorageStore(
-	storage.defineItem<boolean>(`local:video-${videoId}-auto-scroll`, {
+	storage.defineItem<boolean>(`local:video-${videoId}/auto-scroll`, {
 		fallback: true,
 	}),
 );
