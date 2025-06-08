@@ -1,33 +1,12 @@
-import { createBirpc } from "birpc";
-import { browser } from "wxt/browser";
+import { createRpcClient, registerRpcHandler } from "../../utils/rpc";
 import type { ContentService } from "./main";
 
+const RPC_NAME = "content-rpc";
+
 export function registerContentService(contentService: ContentService) {
-	browser.runtime.onConnect.addListener((port) => {
-		if (port.name === "content-rpc") {
-			const rpc = createBirpc<{}, ContentService>(contentService, {
-				bind: "functions",
-				post: (data) => port.postMessage(data),
-				on: (fn) => port.onMessage.addListener(fn),
-			});
-			port.onDisconnect.addListener(() => {
-				rpc.$close();
-			});
-		}
-	});
+	registerRpcHandler(RPC_NAME, contentService);
 }
 
 export function createContentServiceClient(tabId: number) {
-	const port = browser.tabs.connect(tabId, { name: "content-rpc" });
-	const rpc = createBirpc<ContentService, {}>(
-		{},
-		{
-			post: (data) => port.postMessage(data),
-			on: (fn) => port.onMessage.addListener(fn),
-		},
-	);
-	port.onDisconnect.addListener(() => {
-		rpc.$close();
-	});
-	return rpc;
+	return createRpcClient<ContentService>(RPC_NAME, tabId);
 }

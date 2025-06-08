@@ -6,15 +6,15 @@ import {
 import { useStore } from "@tanstack/react-store";
 import React from "react";
 import { storage } from "wxt/utils/storage";
-import { cls, SelectWrapper } from "../../ui";
+import { WxtStorageStore } from "../../utils/storage";
+import { cls, SelectWrapper } from "../../utils/ui";
 import {
 	type CaptionEntry,
 	type CaptionTrackMetadata,
 	captionTrackName,
 	fetchCaptionEntries,
 	stringifyTimestamp,
-} from "../../utils";
-import { WxtStorageStore } from "../../utils/storage";
+} from "../../utils/youtube";
 import { createContentServiceClient } from "../content/rpc";
 
 const queryClient = new QueryClient();
