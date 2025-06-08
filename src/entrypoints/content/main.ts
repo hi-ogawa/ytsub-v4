@@ -40,15 +40,13 @@ export class ContentService {
 		return {
 			playing: video?.paused ?? false,
 			time: video?.currentTime ?? 0,
-			loop: video?.loop ?? false,
 		};
 	}
 
-	playVideoAt(time: number) {
+	seek(time: number) {
 		const video = this.getVideo();
 		if (video) {
 			video.currentTime = time;
-			// setTimeout(() => video.play());
 		}
 	}
 
@@ -112,5 +110,5 @@ export async function main(ctx: ContentScriptContext) {
 		return service.fetchMetadata(e.data);
 	});
 
-	onMessage("play", (e) => service.playVideoAt(e.data));
+	onMessage("play", (e) => service.seek(e.data));
 }

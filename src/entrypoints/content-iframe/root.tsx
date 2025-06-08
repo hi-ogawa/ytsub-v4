@@ -156,9 +156,6 @@ function MainView(props: {
 						{/* TODO */}
 						{/* <li>
 							<span>Auto Scroll</span>
-						</li>
-						<li>
-							<span>Loop video</span>
 						</li> */}
 						<li
 							className={cls(!(language1 && language2) && "menu-disabled")}
@@ -187,7 +184,7 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 		queryFn: async () => {
 			return rpc.getVideoState();
 		},
-		initialData: { playing: false, time: 0, loop: false },
+		initialData: { playing: false, time: 0 },
 		refetchInterval: 200,
 	});
 	const state = query.data;
@@ -221,7 +218,7 @@ function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
 			onClick={async () => {
 				const selection = window.getSelection();
 				if (!selection || !selection.isCollapsed) return;
-				await rpc.playVideoAt(props.entry.begin);
+				await rpc.seek(props.entry.begin);
 			}}
 		>
 			<div className="text-xs text-gray-500">
