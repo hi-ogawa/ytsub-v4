@@ -236,6 +236,12 @@ function CaptionsView({
 
 	const [loopEntry, setLoopEntry] = React.useState<CaptionEntry>();
 
+	React.useEffect(() => {
+		if (loopEntry && currentEntry !== loopEntry) {
+			rpc.seek(loopEntry.begin);
+		}
+	}, [loopEntry, state.time]);
+
 	return (
 		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
 			{captionEntries.map((e) => (
