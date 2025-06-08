@@ -4,15 +4,51 @@ import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { sendMessage } from "../background/rpc";
 import { onMessage } from "./rpc";
 
-export async function main(ctx: ContentScriptContext) {
-	const { tabId } = await sendMessage("initContent", undefined);
+export class ContentService {
+	ui?: ReturnType<typeof createIframeUi>;
 
-	let ui: ReturnType<typeof createIframeUi> | undefined;
+	constructor(
+		private ctx: ContentScriptContext,
+		private tabId: number,
+	) {
+		// watch location change
+	}
 
-	onMessage("show", () => {
-		const videoId = parseVideoId(window.location.href);
-		ui = createIframeUi(ctx, {
-			page: `content-iframe.html?tabId=${tabId}&videoId=${videoId}`,
+	fetchMetadata(videoId: string) {
+		return fetchMetadataJson(videoId);
+	}
+
+	getPageState() {
+		return {
+			videoId: parseVideoId(window.location.href),
+			mounted: !!this.ui,
+		};
+	}
+
+	getVideo() {
+		return document.querySelector<HTMLVideoElement>("video.html5-main-video");
+	}
+
+	getVideoState() {
+		const video = this.getVideo();
+		return {
+			playing: video?.paused ?? false,
+			time: video?.currentTime ?? 0,
+		};
+	}
+
+	playVideoAt(time: number) {
+		const video = this.getVideo();
+		if (video) {
+			video.currentTime = time;
+			setTimeout(() => video.play());
+		}
+	}
+
+	showUI() {
+		const { videoId } = this.getPageState();
+		this.ui = createIframeUi(this.ctx, {
+			page: `content-iframe.html?tabId=${this.tabId}&videoId=${videoId}`,
 			position: "inline",
 			anchor: "body",
 			onMount: (wrapper, iframe) => {
@@ -27,39 +63,41 @@ export async function main(ctx: ContentScriptContext) {
 				iframe.style.border = "none";
 			},
 		});
-		ui.mount();
+		this.ui.mount();
+	}
+
+	hideUI() {
+		this.ui?.remove();
+		this.ui = undefined;
+	}
+}
+
+export async function main(ctx: ContentScriptContext) {
+	const { tabId } = await sendMessage("initContent", undefined);
+
+	const service = new ContentService(ctx, tabId);
+
+	onMessage("show", () => {
+		service.showUI();
 	});
 
 	onMessage("hide", () => {
-		ui?.remove();
-		ui = undefined;
+		service.hideUI();
 	});
 
 	onMessage("getState", () => {
-		const video = service.getVideo();
+		const { mounted } = service.getPageState();
+		const { playing, time } = service.getVideoState();
 		return {
-			mounted: !!ui,
-			playing: video?.paused ?? false,
-			time: video?.currentTime ?? 0,
+			mounted,
+			playing,
+			time,
 		};
 	});
 
-	const service = {
-		getVideo() {
-			return document.querySelector<HTMLVideoElement>("video.html5-main-video");
-		},
-
-		play(time: number) {
-			const video = this.getVideo();
-			if (!video) return;
-			video.currentTime = time;
-			setTimeout(() => video.play());
-		},
-	};
-
 	onMessage("fetchMetadata", async (e) => {
-		return fetchMetadataJson(e.data);
+		return service.fetchMetadata(e.data);
 	});
 
-	onMessage("play", ({ data }) => service.play(data));
+	onMessage("play", (e) => service.playVideoAt(e.data));
 }
