@@ -48,7 +48,7 @@ function RootInner() {
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
-			const metadata = await sendMessage("fetchMetadata", undefined, { tabId });
+			const metadata = await sendMessage("fetchMetadata", videoId, { tabId });
 			const storageData = await videoStorage.getValue();
 			return { metadata, storageData };
 		},
@@ -109,6 +109,26 @@ function MainView(props: {
 		lastData?.captionEntries,
 	);
 
+	async function loadCaptionEntries() {
+		if (!language1 || !language2) return;
+		const entries = await fetchCaptionEntries({
+			language1,
+			language2,
+		});
+		setCaptionEntries(entries);
+		videoStorage.setValue({
+			lastSelected: {
+				language1,
+				language2,
+				captionEntries: entries,
+			},
+		});
+	}
+
+	React.useEffect(() => {
+		loadCaptionEntries();
+	}, [language1, language2]);
+
 	return (
 		<>
 			<div className="flex gap-2 items-stretch">
@@ -126,29 +146,33 @@ function MainView(props: {
 					onChange={(e) => setLanguage2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
-				<button
-					className={cls(
-						`btn p-2`,
-						!(language1 && language2) && "btn-disabled",
-					)}
-					onClick={async () => {
-						if (!language1 || !language2) return;
-						const captionEntries = await fetchCaptionEntries({
-							language1,
-							language2,
-						});
-						setCaptionEntries(captionEntries);
-						videoStorage.setValue({
-							lastSelected: {
-								language1,
-								language2,
-								captionEntries,
-							},
-						});
-					}}
-				>
-					<span className="icon-[ri--refresh-line] text-lg"></span>
-				</button>
+				<details className="dropdown dropdown-end">
+					<summary className="btn p-2">
+						<span className="icon-[ri--settings-3-line] text-lg"></span>
+					</summary>
+					<ul className="menu dropdown-content rounded-box z-1 w-40 mt-1 p-2 bg-gray-100 border-1 border-gray-300">
+						{/* TODO */}
+						{/* <li>
+							<span>Auto Scroll</span>
+						</li>
+						<li>
+							<span>Loop video</span>
+						</li> */}
+						<li
+							className={cls(!(language1 && language2) && "menu-disabled")}
+							onClick={() => loadCaptionEntries()}
+						>
+							<span>Reload captions</span>
+						</li>
+						<li
+							onClick={async () => {
+								await sendMessage("hide", undefined, { tabId });
+							}}
+						>
+							<span>Hide captions</span>
+						</li>
+					</ul>
+				</details>
 			</div>
 			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
 		</>
