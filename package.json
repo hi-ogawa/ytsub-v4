@@ -32,7 +32,6 @@
 		"@vitejs/plugin-react": "^4.5.0",
 		"@webext-core/messaging": "^2.2.0",
 		"@wxt-dev/auto-icons": "^1.0.2",
-		"@wxt-dev/storage": "^1.1.1",
 		"birpc": "^2.3.0",
 		"daisyui": "^5.0.43",
 		"tailwindcss": "^4.1.8",
