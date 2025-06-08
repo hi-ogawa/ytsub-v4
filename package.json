@@ -1,12 +1,13 @@
 {
 	"name": "ytsub",
-	"version": "0.0.0-pre.6",
+	"version": "0.0.0-pre.9",
 	"private": true,
 	"description": "manifest.json description",
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",
 		"build": "wxt zip",
+		"release": "bash scripts/tag.sh",
 		"test": "vitest",
 		"tsc": "tsc -b",
 		"tsc-dev": "tsc -b --watch --preserveWatchOutput",
@@ -27,6 +28,7 @@
 		"@tailwindcss/vite": "^4.1.8",
 		"@tanstack/react-query": "^5.80.6",
 		"@tsconfig/strictest": "^2.0.5",
+		"@types/webextension-polyfill": "^0.12.3",
 		"@vitejs/plugin-react": "^4.5.0",
 		"@webext-core/messaging": "^2.2.0",
 		"@wxt-dev/auto-icons": "^1.0.2",
