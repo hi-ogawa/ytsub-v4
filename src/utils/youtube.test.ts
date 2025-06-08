@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { fetchMetadataJson, parseVideoId } from "./utils";
+import { fetchMetadataJson, parseVideoId } from "./youtube";
 
 test("basic", async () => {
 	const videoId = parseVideoId("https://www.youtube.com/watch?v=pTycfmVzdl8");

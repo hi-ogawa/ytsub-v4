@@ -4,7 +4,6 @@ import { browser } from "wxt/browser";
 export function registerRpcHandler<T extends object>(name: string, handler: T) {
 	browser.runtime.onConnect.addListener((port) => {
 		if (port.name === name) {
-			port.sender;
 			const rpc = createBirpc<{}, T>(handler, {
 				bind: "functions",
 				post: (data) => port.postMessage(data),

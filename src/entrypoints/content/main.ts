@@ -1,8 +1,8 @@
 import { browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
-import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { registerRpcHandler } from "../../utils/rpc";
+import { fetchMetadataJson, parseVideoId } from "../../utils/youtube";
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
