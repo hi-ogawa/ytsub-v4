@@ -31,7 +31,11 @@ export function registerContentService(contentService: ContentService) {
 	browser.runtime.onConnect.addListener((port) => {
 		if (port.name === "content-rpc") {
 			const rpc = createBirpc<{}, ContentService>(contentService, {
-				post: (data) => port.postMessage(data),
+				bind: "functions",
+				post: (data) => {
+					// console.log("💚 [post]", data);
+					return port.postMessage(data);
+				},
 				on: (fn) => port.onMessage.addListener(fn),
 			});
 			port.onDisconnect.addListener(() => {
@@ -46,7 +50,10 @@ export function createContentServiceClient(tabId: number) {
 	const rpc = createBirpc<ContentService, {}>(
 		{},
 		{
-			post: (data) => port.postMessage(data),
+			post: (data) => {
+				// console.log("❤️ [post]", data);
+				return port.postMessage(data);
+			},
 			on: (fn) => port.onMessage.addListener(fn),
 		},
 	);

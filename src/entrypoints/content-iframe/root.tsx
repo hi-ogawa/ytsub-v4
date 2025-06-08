@@ -13,7 +13,7 @@ import {
 	fetchCaptionEntries,
 	stringifyTimestamp,
 } from "../../utils";
-import { createContentServiceClient, sendMessage } from "../content/rpc";
+import { createContentServiceClient } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +51,6 @@ function RootInner() {
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
 			const metadata = await rpc.fetchMetadata(videoId);
-			// const metadata = await sendMessage("fetchMetadata", videoId, { tabId });
 			const storageData = await videoStorage.getValue();
 			return { metadata, storageData };
 		},
@@ -169,7 +168,7 @@ function MainView(props: {
 						</li>
 						<li
 							onClick={async () => {
-								await sendMessage("hide", undefined, { tabId });
+								await rpc.hideUI();
 							}}
 						>
 							<span>Hide captions</span>
@@ -186,10 +185,9 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	const query = useQuery({
 		queryKey: ["getState"],
 		queryFn: async () => {
-			const result = await sendMessage("getState", undefined, { tabId });
-			return result;
+			return rpc.getVideoState();
 		},
-		initialData: { playing: false, time: 0, mounted: true },
+		initialData: { playing: false, time: 0, loop: false },
 		refetchInterval: 200,
 	});
 	const state = query.data;
@@ -223,8 +221,7 @@ function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
 			onClick={async () => {
 				const selection = window.getSelection();
 				if (!selection || !selection.isCollapsed) return;
-
-				await sendMessage("play", props.entry.begin, { tabId });
+				await rpc.playVideoAt(props.entry.begin);
 			}}
 		>
 			<div className="text-xs text-gray-500">
