@@ -75,9 +75,8 @@ export class ContentService {
 
 	seek(time: number) {
 		const video = this.getVideo();
-		if (video) {
-			video.currentTime = time;
-		}
+		if (!video) return;
+		video.currentTime = time;
 	}
 
 	showUI() {
