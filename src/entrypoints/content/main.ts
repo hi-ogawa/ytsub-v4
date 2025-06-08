@@ -11,7 +11,13 @@ export class ContentService {
 		private ctx: ContentScriptContext,
 		private tabId: number,
 	) {
-		// watch location change
+		this.ctx.addEventListener(window, "wxt:locationchange", (e) => {
+			const lastVideoId = parseVideoId(e.oldUrl.href);
+			const newVideoId = parseVideoId(e.newUrl.href);
+			if (lastVideoId !== newVideoId) {
+				this.hideUI();
+			}
+		});
 	}
 
 	fetchMetadata(videoId: string) {
