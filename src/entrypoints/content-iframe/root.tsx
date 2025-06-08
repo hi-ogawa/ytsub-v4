@@ -118,7 +118,6 @@ function MainView(props: {
 	const [captionEntries, setCaptionEntries] = React.useState(
 		lastData?.captionEntries,
 	);
-	// const [autoScroll, setAutoScroll] = useAutoScroll();
 	const autoScroll = useStore(autoScrollStore);
 
 	async function loadCaptionEntries() {
