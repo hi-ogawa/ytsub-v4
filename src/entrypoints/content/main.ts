@@ -2,10 +2,11 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { sendMessage } from "../background/rpc";
-import { onMessage, registerContentService } from "./rpc";
+import { registerContentService } from "./rpc";
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
+	controlUI: ReturnType<typeof createIframeUi>;
 
 	constructor(
 		public ctx: ContentScriptContext,
@@ -17,7 +18,27 @@ export class ContentService {
 			if (lastVideoId !== newVideoId) {
 				this.hideUI();
 			}
+			this.controlUI.wrapper.hidden = !newVideoId;
 		});
+
+		this.controlUI = createIframeUi(this.ctx, {
+			page: `content-iframe.html?tabId=${this.tabId}&control=true`,
+			position: "inline",
+			anchor: "body",
+			onMount: (wrapper, iframe) => {
+				wrapper.style.position = "fixed";
+				wrapper.style.height = "50px";
+				wrapper.style.width = "50px";
+				wrapper.style.right = "20px";
+				wrapper.style.bottom = "20px";
+				wrapper.style.zIndex = "100000";
+				iframe.style.width = "100%";
+				iframe.style.height = "100%";
+				iframe.style.border = "none";
+				wrapper.hidden = !this.getPageState().videoId;
+			},
+		});
+		this.controlUI.mount();
 	}
 
 	fetchMetadata(videoId: string) {
@@ -51,6 +72,7 @@ export class ContentService {
 	}
 
 	showUI() {
+		if (this.ui) return;
 		const video = this.getVideo();
 		const { videoId } = this.getPageState();
 		if (!videoId || !video) {
@@ -74,41 +96,19 @@ export class ContentService {
 			},
 		});
 		this.ui.mount();
+		this.controlUI.wrapper.hidden = true;
 	}
 
 	hideUI() {
-		this.ui?.remove();
+		if (!this.ui) return;
+		this.ui.remove();
 		this.ui = undefined;
+		this.controlUI.wrapper.hidden = false;
 	}
 }
 
 export async function main(ctx: ContentScriptContext) {
 	const { tabId } = await sendMessage("initContent", undefined);
-
 	const service = new ContentService(ctx, tabId);
 	registerContentService(service);
-
-	onMessage("show", () => {
-		service.showUI();
-	});
-
-	onMessage("hide", () => {
-		service.hideUI();
-	});
-
-	onMessage("getState", () => {
-		const { mounted } = service.getPageState();
-		const { playing, time } = service.getVideoState();
-		return {
-			mounted,
-			playing,
-			time,
-		};
-	});
-
-	onMessage("fetchMetadata", async (e) => {
-		return service.fetchMetadata(e.data);
-	});
-
-	onMessage("play", (e) => service.seek(e.data));
 }
