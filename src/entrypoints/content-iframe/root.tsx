@@ -298,7 +298,7 @@ function CaptionEntryView(props: {
 					<span
 						className={cls(
 							"icon-[ri--repeat-line] cursor-pointer",
-							props.isLooping ? "text-blue-700" : "text-gray-500",
+							props.isLooping ? "text-blue-700 scale-110" : "text-gray-500",
 						)}
 						onClick={(e) => {
 							e.stopPropagation();
