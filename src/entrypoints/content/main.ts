@@ -48,7 +48,6 @@ export class ContentService {
 	getPageState() {
 		return {
 			videoId: parseVideoId(window.location.href),
-			mounted: !!this.ui,
 		};
 	}
 
