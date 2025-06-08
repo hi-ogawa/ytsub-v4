@@ -2,7 +2,7 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { sendMessage } from "../background/rpc";
-import { onMessage, registerContentService } from "./rpc";
+import { registerContentService } from "./rpc";
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
@@ -109,31 +109,6 @@ export class ContentService {
 
 export async function main(ctx: ContentScriptContext) {
 	const { tabId } = await sendMessage("initContent", undefined);
-
 	const service = new ContentService(ctx, tabId);
 	registerContentService(service);
-
-	onMessage("show", () => {
-		service.showUI();
-	});
-
-	onMessage("hide", () => {
-		service.hideUI();
-	});
-
-	onMessage("getState", () => {
-		const { mounted } = service.getPageState();
-		const { playing, time } = service.getVideoState();
-		return {
-			mounted,
-			playing,
-			time,
-		};
-	});
-
-	onMessage("fetchMetadata", async (e) => {
-		return service.fetchMetadata(e.data);
-	});
-
-	onMessage("play", (e) => service.seek(e.data));
 }
