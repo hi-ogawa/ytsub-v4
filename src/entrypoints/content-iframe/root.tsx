@@ -3,8 +3,8 @@ import {
 	QueryClientProvider,
 	useQuery,
 } from "@tanstack/react-query";
-import { storage } from "wxt/utils/storage";
 import React from "react";
+import { storage } from "wxt/utils/storage";
 import { cls, SelectWrapper } from "../../ui";
 import {
 	type CaptionEntry,

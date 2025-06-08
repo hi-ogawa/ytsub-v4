@@ -1,9 +1,9 @@
-import { onMessage } from "./rpc";
+import { browser } from "wxt/browser";
 
 export async function main() {
-	onMessage("initContent", async (e) => {
-		return {
-			tabId: e.sender.tab!.id!,
-		};
+	browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+		if (message === "background-rpc-init") {
+			sendResponse(sender.tab?.id);
+		}
 	});
 }
