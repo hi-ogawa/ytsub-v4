@@ -27,10 +27,10 @@ export class ContentService {
 			anchor: "body",
 			onMount: (wrapper, iframe) => {
 				wrapper.style.position = "fixed";
-				wrapper.style.height = "50px";
-				wrapper.style.width = "50px";
-				wrapper.style.right = "20px";
-				wrapper.style.bottom = "20px";
+				wrapper.style.height = "45px";
+				wrapper.style.width = "45px";
+				wrapper.style.right = "15px";
+				wrapper.style.bottom = "10px";
 				wrapper.style.zIndex = "100000";
 				iframe.style.width = "100%";
 				iframe.style.height = "100%";
@@ -48,6 +48,7 @@ export class ContentService {
 	getPageState() {
 		return {
 			videoId: parseVideoId(window.location.href),
+			ui: !!this.ui,
 		};
 	}
 
@@ -104,14 +105,12 @@ export class ContentService {
 			},
 		});
 		this.ui.mount();
-		this.controlUI.wrapper.hidden = true;
 	}
 
 	hideUI() {
 		if (!this.ui) return;
 		this.ui.remove();
 		this.ui = undefined;
-		this.controlUI.wrapper.hidden = false;
 	}
 }
 

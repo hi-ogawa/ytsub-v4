@@ -19,3 +19,31 @@ export class WxtStorageStore<
 		});
 	}
 }
+
+export class AsyncQueryStore<
+	T,
+	TUpdater extends AnyUpdater = (cb: T) => T,
+> extends Store<T, TUpdater> {
+	constructor(
+		private asyncOptions: {
+			initial: T;
+			get: () => Promise<T>;
+			set?: (newValue: T) => void | Promise<void>;
+			interval: number;
+		},
+	) {
+		super(asyncOptions.initial);
+		setTimeout(() => this.refetch());
+		setInterval(() => this.refetch(), this.asyncOptions.interval);
+	}
+
+	async refetch() {
+		const value = await this.asyncOptions.get();
+		this.setState(value);
+	}
+
+	async mutate(newValue: T) {
+		await this.asyncOptions.set?.(newValue);
+		await this.refetch();
+	}
+}
