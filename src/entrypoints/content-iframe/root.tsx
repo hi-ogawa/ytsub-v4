@@ -67,7 +67,7 @@ function RootInner() {
 	});
 
 	return (
-		<div className="p-2 flex flex-col gap-2 h-full bg-white rounded border-1 border-gray-300">
+		<div className="p-2 flex flex-col gap-2 h-full bg-white/95 rounded border-1 border-gray-300">
 			{query.isError && (
 				<div role="alert" className="alert alert-error alert-soft text-sm">
 					<span>Failed to load captions</span>
