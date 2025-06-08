@@ -178,6 +178,8 @@ function MainView(props: {
 	);
 }
 
+let autoScroll = true;
+
 function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	const query = useQuery({
 		queryKey: ["getState"],
@@ -192,6 +194,19 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 		() => findCurrentEntry(props.captionEntries, state.time),
 		[props.captionEntries, state.time],
 	);
+
+	React.useEffect(() => {
+		if (!autoScroll || !currentEntry) return;
+		const element = document.querySelector(
+			`[data-entry-index="${currentEntry.index}"]`,
+		);
+		if (!element) return;
+		element.scrollIntoView({
+			block: "nearest",
+			inline: "nearest",
+			behavior: "smooth",
+		});
+	}, [currentEntry, autoScroll, state.time]);
 
 	return (
 		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
@@ -209,6 +224,7 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
 	return (
 		<div
+			data-entry-index={props.entry.index}
 			className={cls(
 				"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
 				props.isCurrent
