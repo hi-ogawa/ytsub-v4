@@ -18,6 +18,7 @@ export class ContentService {
 			if (lastVideoId !== newVideoId) {
 				this.hideUI();
 			}
+			this.controlUI.wrapper.hidden = !newVideoId;
 		});
 
 		this.controlUI = createIframeUi(this.ctx, {
@@ -34,6 +35,7 @@ export class ContentService {
 				iframe.style.width = "100%";
 				iframe.style.height = "100%";
 				iframe.style.border = "none";
+				wrapper.hidden = !this.getPageState().videoId;
 			},
 		});
 		this.controlUI.mount();
