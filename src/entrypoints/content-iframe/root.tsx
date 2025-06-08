@@ -3,9 +3,9 @@ import {
 	QueryClientProvider,
 	useQuery,
 } from "@tanstack/react-query";
+import { useStore } from "@tanstack/react-store";
 import React from "react";
 import { storage } from "wxt/utils/storage";
-import { createUseStorage } from "../../hooks";
 import { cls, SelectWrapper } from "../../ui";
 import {
 	type CaptionEntry,
@@ -14,6 +14,7 @@ import {
 	fetchCaptionEntries,
 	stringifyTimestamp,
 } from "../../utils";
+import { WxtStorageStore } from "../../utils/storage";
 import { createContentServiceClient } from "../content/rpc";
 
 const queryClient = new QueryClient();
@@ -39,10 +40,11 @@ const videoStorage = storage.defineItem<VideoStorageData>(
 	},
 );
 
-const autoScrollStorage = storage.defineItem<boolean>(`local:auto-scroll`, {
-	fallback: true,
-});
-const useAutoScroll = createUseStorage(autoScrollStorage);
+const autoScrollStore = new WxtStorageStore(
+	storage.defineItem<boolean>(`local:video-${videoId}-auto-scroll`, {
+		fallback: true,
+	}),
+);
 
 export function Root() {
 	return (
@@ -116,7 +118,8 @@ function MainView(props: {
 	const [captionEntries, setCaptionEntries] = React.useState(
 		lastData?.captionEntries,
 	);
-	const [autoScroll, setAutoScroll] = useAutoScroll();
+	// const [autoScroll, setAutoScroll] = useAutoScroll();
+	const autoScroll = useStore(autoScrollStore);
 
 	async function loadCaptionEntries() {
 		if (!language1 || !language2) return;
@@ -162,7 +165,7 @@ function MainView(props: {
 					<ul className="menu dropdown-content rounded-box z-1 w-40 mt-1 p-2 bg-gray-100 border-1 border-gray-300">
 						<li
 							onClick={() => {
-								setAutoScroll(!autoScroll);
+								autoScrollStore.setState((prev) => !prev);
 							}}
 						>
 							<span className="flex items-center">
