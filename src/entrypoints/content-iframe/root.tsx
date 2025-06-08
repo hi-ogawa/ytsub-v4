@@ -225,7 +225,7 @@ function CaptionsView({
 		const current =
 			(elementRect.top + elementRect.height / 2 - containerRect.top) /
 			containerRect.height;
-		if (Math.abs(current - 0.5) < 0.35) return;
+		if (Math.abs(current - 0.5) < 0.3) return;
 
 		element.scrollIntoView({
 			block: "center",
@@ -237,6 +237,7 @@ function CaptionsView({
 	const [loopEntry, setLoopEntry] = React.useState<CaptionEntry>();
 
 	React.useEffect(() => {
+		// TODO: throttle while manual scrolling
 		if (loopEntry && currentEntry !== loopEntry) {
 			rpc.seek(loopEntry.begin);
 		}
@@ -301,7 +302,7 @@ function CaptionEntryView(props: {
 						)}
 						onClick={(e) => {
 							e.stopPropagation();
-							props.setLoopEntry(props.entry);
+							props.setLoopEntry(props.isLooping ? undefined : props.entry);
 						}}
 					></span>
 				</span>
