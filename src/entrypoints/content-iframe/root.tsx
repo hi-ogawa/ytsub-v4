@@ -220,9 +220,20 @@ function CaptionsView({
 			`[data-entry-index="${currentEntry.index}"]`,
 		);
 		if (!element) return;
+
+		// check element position
+		const container = element.parentElement;
+		if (!container) return;
+		const containerRect = container.getBoundingClientRect();
+		const elementRect = element.getBoundingClientRect();
+		const current =
+			(elementRect.top + elementRect.height / 2 - containerRect.top) /
+			containerRect.height;
+		if (Math.abs(current - 0.5) < 0.25) return;
+
 		element.scrollIntoView({
-			block: "nearest",
-			inline: "nearest",
+			block: "center",
+			inline: "center",
 			behavior: "smooth",
 		});
 	}, [currentEntry, autoScroll]);
