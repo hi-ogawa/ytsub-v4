@@ -3,6 +3,7 @@ import {
 	QueryClientProvider,
 	useQuery,
 } from "@tanstack/react-query";
+import { storage } from "@wxt-dev/storage";
 import React from "react";
 import { cls, SelectWrapper } from "../../ui";
 import {
@@ -17,7 +18,21 @@ import { sendMessage } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
-const tabId = Number(new URL(window.location.href).searchParams.get("tabId"));
+const searchParams = new URL(window.location.href).searchParams;
+const tabId = Number(searchParams.get("tabId"));
+const videoId = String(searchParams.get("videoId"));
+
+// TODO:
+// - normalize videoMetadata and cache
+// - cache last loaded language pair
+// - cache last loaded captions
+
+type VideoCache = {};
+
+const videoCache = storage.defineItem<VideoCache>(`local:video-${videoId}`, {
+	fallback: {},
+});
+videoCache;
 
 export function Root() {
 	return (
@@ -28,6 +43,8 @@ export function Root() {
 }
 
 function RootInner() {
+	videoId;
+
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {

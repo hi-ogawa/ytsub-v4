@@ -22,7 +22,7 @@ export async function main(ctx: ContentScriptContext) {
 	const { tabId } = await sendMessage("initContent", undefined);
 
 	const ui = createIframeUi(ctx, {
-		page: `content-iframe.html?tabId=${tabId}`,
+		page: `content-iframe.html?tabId=${tabId}&videoId=${videoId}`,
 		position: "inline",
 		anchor: "body",
 		onMount: (wrapper, iframe) => {
