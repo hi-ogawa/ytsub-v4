@@ -168,38 +168,51 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 		refetchInterval: 200,
 	});
 	const state = query.data;
-	const currentEntry = findCurrentEntry(props.captionEntries, state.time);
+	const currentEntry = React.useMemo(
+		() => findCurrentEntry(props.captionEntries, state.time),
+		[props.captionEntries, state.time],
+	);
 
 	return (
 		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
 			{props.captionEntries.map((e) => (
-				<div
+				<CaptionEntryView
 					key={e.index}
-					className={cls(
-						"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
-						e === currentEntry
-							? "bg-green-100 hover:bg-green-200 border-green-300"
-							: "bg-gray-100 hover:bg-gray-200 border-gray-300",
-					)}
-					onClick={async () => {
-						const selection = window.getSelection();
-						if (!selection || !selection.isCollapsed) return;
-
-						await sendMessage("play", e.begin, { tabId });
-					}}
-				>
-					<div className="text-xs text-gray-500">
-						<span>
-							{stringifyTimestamp(e.begin)} - {stringifyTimestamp(e.end)}
-						</span>
-					</div>
-					<div className="flex gap-1.5">
-						<div className="flex-1">{e.text1}</div>
-						<span className="border-l border-gray-300"></span>
-						<div className="flex-1">{e.text2}</div>
-					</div>
-				</div>
+					entry={e}
+					isCurrent={e === currentEntry}
+				/>
 			))}
+		</div>
+	);
+}
+
+function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
+	return (
+		<div
+			className={cls(
+				"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
+				props.isCurrent
+					? "bg-green-100 hover:bg-green-200 border-green-300"
+					: "bg-gray-100 hover:bg-gray-200 border-gray-300",
+			)}
+			onClick={async () => {
+				const selection = window.getSelection();
+				if (!selection || !selection.isCollapsed) return;
+
+				await sendMessage("play", props.entry.begin, { tabId });
+			}}
+		>
+			<div className="text-xs text-gray-500">
+				<span>
+					{stringifyTimestamp(props.entry.begin)} -{" "}
+					{stringifyTimestamp(props.entry.end)}
+				</span>
+			</div>
+			<div className="flex gap-1.5">
+				<div className="flex-1">{props.entry.text1}</div>
+				<span className="border-l border-gray-300"></span>
+				<div className="flex-1">{props.entry.text2}</div>
+			</div>
 		</div>
 	);
 }
