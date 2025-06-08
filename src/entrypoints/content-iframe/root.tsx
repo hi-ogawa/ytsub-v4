@@ -13,13 +13,15 @@ import {
 	fetchCaptionEntries,
 	stringifyTimestamp,
 } from "../../utils";
-import { sendMessage } from "../content/rpc";
+import { createContentServiceClient, sendMessage } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
 const searchParams = new URL(window.location.href).searchParams;
 const tabId = Number(searchParams.get("tabId"));
 const videoId = String(searchParams.get("videoId"));
+
+const rpc = createContentServiceClient(tabId);
 
 type VideoStorageData = {
 	lastSelected?: {
@@ -48,7 +50,8 @@ function RootInner() {
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
-			const metadata = await sendMessage("fetchMetadata", videoId, { tabId });
+			const metadata = await rpc.fetchMetadata(videoId);
+			// const metadata = await sendMessage("fetchMetadata", videoId, { tabId });
 			const storageData = await videoStorage.getValue();
 			return { metadata, storageData };
 		},
