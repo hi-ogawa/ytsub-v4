@@ -3,6 +3,7 @@ import {
 	QueryClientProvider,
 	useQuery,
 } from "@tanstack/react-query";
+import { storage } from "@wxt-dev/storage";
 import React from "react";
 import { cls, SelectWrapper } from "../../ui";
 import {
@@ -11,13 +12,29 @@ import {
 	captionTrackName,
 	fetchCaptionEntries,
 	stringifyTimestamp,
-	type VideoMetadata,
 } from "../../utils";
 import { sendMessage } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
-const tabId = Number(new URL(window.location.href).searchParams.get("tabId"));
+const searchParams = new URL(window.location.href).searchParams;
+const tabId = Number(searchParams.get("tabId"));
+const videoId = String(searchParams.get("videoId"));
+
+type VideoStorageData = {
+	lastSelected?: {
+		language1: CaptionTrackMetadata;
+		language2: CaptionTrackMetadata;
+		captionEntries: CaptionEntry[];
+	};
+};
+
+const videoStorage = storage.defineItem<VideoStorageData>(
+	`local:video-${videoId}`,
+	{
+		fallback: {},
+	},
+);
 
 export function Root() {
 	return (
@@ -31,8 +48,9 @@ function RootInner() {
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
-			const result = await sendMessage("fetchMetadata", undefined, { tabId });
-			return result;
+			const metadata = await sendMessage("fetchMetadata", undefined, { tabId });
+			const storageData = await videoStorage.getValue();
+			return { metadata, storageData };
 		},
 		staleTime: Infinity,
 		gcTime: Infinity,
@@ -42,54 +60,94 @@ function RootInner() {
 		<div className="p-2 flex flex-col gap-2">
 			{query.isError && (
 				<div role="alert" className="alert alert-error alert-soft text-sm">
-					<span>Failed to load captions data</span>
+					<span>Failed to load captions</span>
 				</div>
 			)}
-			{query.data && <MainView metadata={query.data} />}
+			{query.isSuccess &&
+				(() => {
+					const captionTracks =
+						query.data.metadata.captions?.playerCaptionsTracklistRenderer
+							.captionTracks;
+					if (!captionTracks || captionTracks.length === 0) {
+						return (
+							<div
+								role="alert"
+								className="alert alert-error alert-soft text-sm"
+							>
+								<span>Failed to load captions</span>
+							</div>
+						);
+					}
+					return (
+						<MainView
+							captionTracks={captionTracks}
+							storageData={query.data.storageData}
+						/>
+					);
+				})()}
 		</div>
 	);
 }
 
-function MainView(props: { metadata: VideoMetadata }) {
-	const [lang1, setLang1] = React.useState<CaptionTrackMetadata>();
-	const [lang2, setLang2] = React.useState<CaptionTrackMetadata>();
-	const [captionEntries, setCaptionEntries] = React.useState<CaptionEntry[]>();
-
-	const captionTracks =
-		props.metadata.captions?.playerCaptionsTracklistRenderer.captionTracks;
-	if (!captionTracks) {
-		return <div>No captions available.</div>;
-	}
+function MainView(props: {
+	captionTracks: CaptionTrackMetadata[];
+	storageData: VideoStorageData;
+}) {
+	const captionTracks = props.captionTracks;
+	const lastData = props.storageData.lastSelected;
+	const [language1, setLanauge2] = React.useState(
+		() =>
+			lastData?.language1 &&
+			captionTracks.find((e) => e.vssId === lastData.language1.vssId),
+	);
+	const [language2, setLanguage2] = React.useState(
+		() =>
+			lastData?.language2 &&
+			captionTracks.find((e) => e.vssId === lastData.language2.vssId),
+	);
+	const [captionEntries, setCaptionEntries] = React.useState(
+		lastData?.captionEntries,
+	);
 
 	return (
 		<>
 			<div className="flex gap-2 items-stretch">
 				<SelectWrapper
 					className="select"
-					value={lang1}
+					value={language1}
 					options={[undefined, ...captionTracks]}
-					onChange={(e) => setLang1(e)}
+					onChange={(e) => setLanauge2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<SelectWrapper
 					className="select"
-					value={lang2}
+					value={language2}
 					options={[undefined, ...captionTracks]}
-					onChange={(e) => setLang2(e)}
+					onChange={(e) => setLanguage2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<button
-					className={cls(`btn p-2`, !(lang1 && lang2) && "btn-disabled")}
+					className={cls(
+						`btn p-2`,
+						!(language1 && language2) && "btn-disabled",
+					)}
 					onClick={async () => {
-						if (!lang1 || !lang2) return;
-						const result = await fetchCaptionEntries({
-							language1: lang1,
-							language2: lang2,
+						if (!language1 || !language2) return;
+						const captionEntries = await fetchCaptionEntries({
+							language1,
+							language2,
 						});
-						setCaptionEntries(result);
+						setCaptionEntries(captionEntries);
+						videoStorage.setValue({
+							lastSelected: {
+								language1,
+								language2,
+								captionEntries,
+							},
+						});
 					}}
 				>
-					<span className="icon-[ri--play-line] text-lg"></span>
+					<span className="icon-[ri--refresh-line] text-lg"></span>
 				</button>
 			</div>
 			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
