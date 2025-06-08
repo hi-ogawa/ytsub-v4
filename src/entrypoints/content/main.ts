@@ -40,6 +40,7 @@ export class ContentService {
 		return {
 			playing: video?.paused ?? false,
 			time: video?.currentTime ?? 0,
+			loop: video?.loop ?? false,
 		};
 	}
 
@@ -52,7 +53,12 @@ export class ContentService {
 	}
 
 	showUI() {
+		const video = this.getVideo();
 		const { videoId } = this.getPageState();
+		if (!videoId || !video) {
+			return;
+		}
+		video.loop = true;
 		this.ui = createIframeUi(this.ctx, {
 			page: `content-iframe.html?tabId=${this.tabId}&videoId=${videoId}`,
 			position: "inline",

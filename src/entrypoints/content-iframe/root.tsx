@@ -154,6 +154,9 @@ function MainView(props: {
 						{/* TODO */}
 						{/* <li>
 							<span>Auto Scroll</span>
+						</li>
+						<li>
+							<span>Loop video</span>
 						</li> */}
 						<li
 							className={cls(!(language1 && language2) && "menu-disabled")}
