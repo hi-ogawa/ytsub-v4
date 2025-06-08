@@ -57,7 +57,7 @@ function RootInner() {
 	});
 
 	return (
-		<div className="p-2 flex flex-col gap-2">
+		<div className="p-2 flex flex-col gap-2 h-full">
 			{query.isError && (
 				<div role="alert" className="alert alert-error alert-soft text-sm">
 					<span>Failed to load captions</span>
@@ -171,7 +171,7 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	const currentEntry = findCurrentEntry(props.captionEntries, state.time);
 
 	return (
-		<div className="flex flex-col gap-2 text-sm">
+		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
 			{props.captionEntries.map((e) => (
 				<div
 					key={e.index}
