@@ -67,7 +67,7 @@ function RootInner() {
 	});
 
 	return (
-		<div className="p-2 flex flex-col gap-2 h-full bg-white rounded border-1 border-gray-300">
+		<div className="p-2 flex flex-col gap-2 h-full bg-white/95 rounded border-1 border-gray-300">
 			{query.isError && (
 				<div role="alert" className="alert alert-error alert-soft text-sm">
 					<span>Failed to load captions</span>
@@ -225,7 +225,7 @@ function CaptionsView({
 		const current =
 			(elementRect.top + elementRect.height / 2 - containerRect.top) /
 			containerRect.height;
-		if (Math.abs(current - 0.5) < 0.35) return;
+		if (Math.abs(current - 0.5) < 0.3) return;
 
 		element.scrollIntoView({
 			block: "center",
@@ -237,6 +237,7 @@ function CaptionsView({
 	const [loopEntry, setLoopEntry] = React.useState<CaptionEntry>();
 
 	React.useEffect(() => {
+		// TODO: throttle while manual scrolling
 		if (loopEntry && currentEntry !== loopEntry) {
 			rpc.seek(loopEntry.begin);
 		}
@@ -297,11 +298,11 @@ function CaptionEntryView(props: {
 					<span
 						className={cls(
 							"icon-[ri--repeat-line] cursor-pointer",
-							props.isLooping ? "text-blue-700" : "text-gray-500",
+							props.isLooping ? "text-blue-700 scale-110" : "text-gray-500",
 						)}
 						onClick={(e) => {
 							e.stopPropagation();
-							props.setLoopEntry(props.entry);
+							props.setLoopEntry(props.isLooping ? undefined : props.entry);
 						}}
 					></span>
 				</span>
