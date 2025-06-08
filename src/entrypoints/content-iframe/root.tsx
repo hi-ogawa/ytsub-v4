@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-store";
 import React from "react";
+import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
 import { WxtStorageStore } from "../../utils/storage";
 import { cls, SelectWrapper } from "../../utils/ui";
@@ -289,16 +290,29 @@ function CaptionEntryView(props: {
 				}
 			}}
 		>
-			<div className="text-xs flex items-center">
+			<div className="text-xs flex items-center px-0.5">
 				<span className="flex-1 text-gray-500">
 					{stringifyTimestamp(props.entry.begin)} -{" "}
 					{stringifyTimestamp(props.entry.end)}
 				</span>
-				<span>
+				<span className="flex items-center gap-1.5">
+					<a
+						href={
+							`chrome-extension://${browser.runtime.id}/typing.html?text=` +
+							encodeURIComponent(props.entry.text1)
+						}
+						className="icon-[ri--keyboard-line] w-4 h-4 text-gray-500 hover:text-gray-700"
+						target="_blank"
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
+					/>
 					<span
 						className={cls(
 							"icon-[ri--repeat-line] cursor-pointer",
-							props.isLooping ? "text-blue-700 scale-110" : "text-gray-500",
+							props.isLooping
+								? "text-blue-700 scale-110"
+								: "text-gray-500 hover:text-gray-700",
 						)}
 						onClick={(e) => {
 							e.stopPropagation();

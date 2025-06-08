@@ -16,6 +16,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.0.0-beta.5",
+		"@hiogawa/tiny-form": "0.0.1-pre.10",
 		"@hiogawa/utils": "^1.7.0",
 		"@iconify-json/ri": "^1.2.5",
 		"@iconify/tailwind4": "^1.0.6",

@@ -14,6 +14,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.0.0-beta.5
         version: 2.0.0-beta.5
+      '@hiogawa/tiny-form':
+        specifier: 0.0.1-pre.10
+        version: 0.0.1-pre.10(react@19.1.0)
       '@hiogawa/utils':
         specifier: ^1.7.0
         version: 1.7.0
@@ -440,6 +443,14 @@ packages:
   '@fregante/relaxed-json@2.0.0':
     resolution: {integrity: sha512-PyUXQWB42s4jBli435TDiYuVsadwRHnMc27YaLouINktvTWsL3FcKrRMGawTayFk46X+n5bE23RjUTWQwrukWw==}
     engines: {node: '>= 0.10.0'}
+
+  '@hiogawa/tiny-form@0.0.1-pre.10':
+    resolution: {integrity: sha512-BIvGs22O+RNCDclikqSAMMxuLTi4Onz0fpMK1qGtxA3ga+jBN3hRfOxUWl1Mei2lPo07ralKGNhKBTxhIlQ3eA==}
+    peerDependencies:
+      react: '*'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   '@hiogawa/utils@1.7.0':
     resolution: {integrity: sha512-ghiEFWBR1NENoHn+lSuW7liicTIzVPN+8Srm5UedCTw43gus0mlse6Wp2lz6GmbOXJ/CalMPp/0Tz2X8tajkAg==}
@@ -3451,6 +3462,10 @@ snapshots:
   '@fluent/syntax@0.19.0': {}
 
   '@fregante/relaxed-json@2.0.0': {}
+
+  '@hiogawa/tiny-form@0.0.1-pre.10(react@19.1.0)':
+    optionalDependencies:
+      react: 19.1.0
 
   '@hiogawa/utils@1.7.0': {}
 
