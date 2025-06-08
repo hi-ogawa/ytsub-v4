@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import React from "react";
 import { storage } from "wxt/utils/storage";
+import { createUseStorage } from "../../hooks";
 import { cls, SelectWrapper } from "../../ui";
 import {
 	type CaptionEntry,
@@ -37,6 +38,11 @@ const videoStorage = storage.defineItem<VideoStorageData>(
 		fallback: {},
 	},
 );
+
+const autoScrollStorage = storage.defineItem<boolean>(`local:auto-scroll`, {
+	fallback: true,
+});
+const useAutoScroll = createUseStorage(autoScrollStorage);
 
 export function Root() {
 	return (
@@ -110,6 +116,7 @@ function MainView(props: {
 	const [captionEntries, setCaptionEntries] = React.useState(
 		lastData?.captionEntries,
 	);
+	const [autoScroll, setAutoScroll] = useAutoScroll();
 
 	async function loadCaptionEntries() {
 		if (!language1 || !language2) return;
@@ -153,10 +160,16 @@ function MainView(props: {
 						<span className="icon-[ri--settings-3-line] text-lg"></span>
 					</summary>
 					<ul className="menu dropdown-content rounded-box z-1 w-40 mt-1 p-2 bg-gray-100 border-1 border-gray-300">
-						{/* TODO */}
-						{/* <li>
-							<span>Auto Scroll</span>
-						</li> */}
+						<li
+							onClick={() => {
+								setAutoScroll(!autoScroll);
+							}}
+						>
+							<span className="flex items-center">
+								<span className="flex-1">Auto Scroll</span>
+								{autoScroll && <span className="icon-[ri--check-line]"></span>}
+							</span>
+						</li>
 						<li
 							className={cls(!(language1 && language2) && "menu-disabled")}
 							onClick={() => loadCaptionEntries()}
@@ -173,14 +186,20 @@ function MainView(props: {
 					</ul>
 				</details>
 			</div>
-			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
+			{captionEntries && (
+				<CaptionsView captionEntries={captionEntries} autoScroll={autoScroll} />
+			)}
 		</>
 	);
 }
 
-let autoScroll = true;
-
-function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
+function CaptionsView({
+	captionEntries,
+	autoScroll,
+}: {
+	captionEntries: CaptionEntry[];
+	autoScroll: boolean;
+}) {
 	const query = useQuery({
 		queryKey: ["getState"],
 		queryFn: async () => {
@@ -191,8 +210,8 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	});
 	const state = query.data;
 	const currentEntry = React.useMemo(
-		() => findCurrentEntry(props.captionEntries, state.time),
-		[props.captionEntries, state.time],
+		() => findCurrentEntry(captionEntries, state.time),
+		[captionEntries, state.time],
 	);
 
 	React.useEffect(() => {
@@ -206,11 +225,11 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 			inline: "nearest",
 			behavior: "smooth",
 		});
-	}, [currentEntry, autoScroll, state.time]);
+	}, [currentEntry, autoScroll]);
 
 	return (
 		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
-			{props.captionEntries.map((e) => (
+			{captionEntries.map((e) => (
 				<CaptionEntryView
 					key={e.index}
 					entry={e}
