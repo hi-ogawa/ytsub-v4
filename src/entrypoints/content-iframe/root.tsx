@@ -106,7 +106,7 @@ function MainView(props: { metadata: VideoMetadata }) {
 						setCaptionEntries(result);
 					}}
 				>
-					<span className="icon-[ri--play-line] text-lg"></span>
+					<span className="icon-[ri--refresh-line] text-lg"></span>
 				</button>
 			</div>
 			{captionEntries && <CaptionsView captionEntries={captionEntries} />}
