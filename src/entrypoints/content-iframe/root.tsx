@@ -173,17 +173,11 @@ function MainView(props: {
 							</span>
 						</li>
 						<li
-							className={cls(!(language1 && language2) && "menu-disabled")}
-							onClick={() => loadCaptionEntries()}
-						>
-							<span>Reload captions</span>
-						</li>
-						<li
 							onClick={async () => {
 								await rpc.hideUI();
 							}}
 						>
-							<span>Hide captions</span>
+							<span>Close</span>
 						</li>
 					</ul>
 				</details>
@@ -231,7 +225,7 @@ function CaptionsView({
 		const current =
 			(elementRect.top + elementRect.height / 2 - containerRect.top) /
 			containerRect.height;
-		if (Math.abs(current - 0.5) < 0.25) return;
+		if (Math.abs(current - 0.5) < 0.35) return;
 
 		element.scrollIntoView({
 			block: "center",
@@ -286,6 +280,7 @@ function CaptionEntryView(props: {
 					{stringifyTimestamp(props.entry.begin)} -{" "}
 					{stringifyTimestamp(props.entry.end)}
 				</span>
+				<span></span>
 			</div>
 			<div className="flex gap-1.5">
 				<div className="flex-1">{props.entry.text1}</div>
