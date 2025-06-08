@@ -22,17 +22,17 @@ const searchParams = new URL(window.location.href).searchParams;
 const tabId = Number(searchParams.get("tabId"));
 const videoId = String(searchParams.get("videoId"));
 
-// TODO:
-// - normalize videoMetadata and cache
-// - cache last loaded language pair
-// - cache last loaded captions
-
-type VideoCache = {};
+type VideoCache = {
+	lastData?: {
+		lang1: CaptionTrackMetadata;
+		lang2: CaptionTrackMetadata;
+		captionEntries: CaptionEntry[];
+	};
+};
 
 const videoCache = storage.defineItem<VideoCache>(`local:video-${videoId}`, {
 	fallback: {},
 });
-videoCache;
 
 export function Root() {
 	return (
@@ -43,13 +43,12 @@ export function Root() {
 }
 
 function RootInner() {
-	videoId;
-
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
-			const result = await sendMessage("fetchMetadata", undefined, { tabId });
-			return result;
+			const metadata = await sendMessage("fetchMetadata", undefined, { tabId });
+			const cache = await videoCache.getValue();
+			return { metadata, cache };
 		},
 		staleTime: Infinity,
 		gcTime: Infinity,
@@ -62,18 +61,34 @@ function RootInner() {
 					<span>Failed to load captions data</span>
 				</div>
 			)}
-			{query.data && <MainView metadata={query.data} />}
+			{query.data && <MainView {...query.data} />}
 		</div>
 	);
 }
 
-function MainView(props: { metadata: VideoMetadata }) {
-	const [lang1, setLang1] = React.useState<CaptionTrackMetadata>();
-	const [lang2, setLang2] = React.useState<CaptionTrackMetadata>();
-	const [captionEntries, setCaptionEntries] = React.useState<CaptionEntry[]>();
-
+function MainView(props: { metadata: VideoMetadata; cache: VideoCache }) {
 	const captionTracks =
 		props.metadata.captions?.playerCaptionsTracklistRenderer.captionTracks;
+	const lastData = props.cache.lastData;
+
+	const [lang1, setLang1] = React.useState<CaptionTrackMetadata | undefined>(
+		() => {
+			if (captionTracks && lastData?.lang1) {
+				return captionTracks.find((e) => e.vssId === lastData.lang1.vssId);
+			}
+		},
+	);
+	const [lang2, setLang2] = React.useState<CaptionTrackMetadata | undefined>(
+		() => {
+			if (captionTracks && lastData?.lang2) {
+				return captionTracks.find((e) => e.vssId === lastData.lang2.vssId);
+			}
+		},
+	);
+	const [captionEntries, setCaptionEntries] = React.useState<
+		CaptionEntry[] | undefined
+	>(lastData?.captionEntries);
+
 	if (!captionTracks) {
 		return <div>No captions available.</div>;
 	}
@@ -104,6 +119,13 @@ function MainView(props: { metadata: VideoMetadata }) {
 							language2: lang2,
 						});
 						setCaptionEntries(result);
+						videoCache.setValue({
+							lastData: {
+								lang1,
+								lang2,
+								captionEntries: result,
+							},
+						});
 					}}
 				>
 					<span className="icon-[ri--refresh-line] text-lg"></span>
