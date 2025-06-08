@@ -234,6 +234,8 @@ function CaptionsView({
 		});
 	}, [currentEntry, autoScroll]);
 
+	const [loopEntry, setLoopEntry] = React.useState<CaptionEntry>();
+
 	return (
 		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
 			{captionEntries.map((e) => (
@@ -242,6 +244,8 @@ function CaptionsView({
 					entry={e}
 					isCurrent={e === currentEntry}
 					isPlaying={state.playing}
+					isLooping={e === loopEntry}
+					setLoopEntry={setLoopEntry}
 				/>
 			))}
 		</div>
@@ -252,6 +256,8 @@ function CaptionEntryView(props: {
 	entry: CaptionEntry;
 	isCurrent: boolean;
 	isPlaying: boolean;
+	isLooping: boolean;
+	setLoopEntry: (e?: CaptionEntry) => void;
 }) {
 	return (
 		<div
@@ -271,16 +277,28 @@ function CaptionEntryView(props: {
 				if (props.isCurrent) {
 					await rpc.togglePlay();
 				} else {
+					props.setLoopEntry(undefined);
 					await rpc.seek(props.entry.begin);
 				}
 			}}
 		>
-			<div className="text-xs text-gray-500">
-				<span>
+			<div className="text-xs flex items-center">
+				<span className="flex-1 text-gray-500">
 					{stringifyTimestamp(props.entry.begin)} -{" "}
 					{stringifyTimestamp(props.entry.end)}
 				</span>
-				<span></span>
+				<span>
+					<span
+						className={cls(
+							"icon-[ri--repeat-line] cursor-pointer",
+							props.isLooping ? "text-blue-700" : "text-gray-500",
+						)}
+						onClick={(e) => {
+							e.stopPropagation();
+							props.setLoopEntry(props.entry);
+						}}
+					></span>
+				</span>
 			</div>
 			<div className="flex gap-1.5">
 				<div className="flex-1">{props.entry.text1}</div>
