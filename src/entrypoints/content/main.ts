@@ -63,6 +63,16 @@ export class ContentService {
 		};
 	}
 
+	togglePlay() {
+		const video = this.getVideo();
+		if (!video) return;
+		if (video.paused) {
+			video.play();
+		} else {
+			video.pause();
+		}
+	}
+
 	seek(time: number) {
 		const video = this.getVideo();
 		if (video) {
