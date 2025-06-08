@@ -173,17 +173,11 @@ function MainView(props: {
 							</span>
 						</li>
 						<li
-							className={cls(!(language1 && language2) && "menu-disabled")}
-							onClick={() => loadCaptionEntries()}
-						>
-							<span>Reload captions</span>
-						</li>
-						<li
 							onClick={async () => {
 								await rpc.hideUI();
 							}}
 						>
-							<span>Hide captions</span>
+							<span>Close</span>
 						</li>
 					</ul>
 				</details>
@@ -231,7 +225,7 @@ function CaptionsView({
 		const current =
 			(elementRect.top + elementRect.height / 2 - containerRect.top) /
 			containerRect.height;
-		if (Math.abs(current - 0.5) < 0.25) return;
+		if (Math.abs(current - 0.5) < 0.35) return;
 
 		element.scrollIntoView({
 			block: "center",
@@ -247,26 +241,38 @@ function CaptionsView({
 					key={e.index}
 					entry={e}
 					isCurrent={e === currentEntry}
+					isPlaying={state.playing}
 				/>
 			))}
 		</div>
 	);
 }
 
-function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
+function CaptionEntryView(props: {
+	entry: CaptionEntry;
+	isCurrent: boolean;
+	isPlaying: boolean;
+}) {
 	return (
 		<div
 			data-entry-index={props.entry.index}
 			className={cls(
-				"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer",
+				"flex flex-col gap-1 p-1.5 rounded-md border-1 cursor-pointer transition",
 				props.isCurrent
-					? "bg-green-100 hover:bg-green-200 border-green-300"
+					? props.isPlaying
+						? "bg-blue-100 hover:bg-blue-200 border-blue-300"
+						: "bg-green-100 hover:bg-green-200 border-green-300"
 					: "bg-gray-100 hover:bg-gray-200 border-gray-300",
 			)}
 			onClick={async () => {
 				const selection = window.getSelection();
 				if (!selection || !selection.isCollapsed) return;
-				await rpc.seek(props.entry.begin);
+
+				if (props.isCurrent) {
+					await rpc.togglePlay();
+				} else {
+					await rpc.seek(props.entry.begin);
+				}
 			}}
 		>
 			<div className="text-xs text-gray-500">
@@ -274,6 +280,7 @@ function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
 					{stringifyTimestamp(props.entry.begin)} -{" "}
 					{stringifyTimestamp(props.entry.end)}
 				</span>
+				<span></span>
 			</div>
 			<div className="flex gap-1.5">
 				<div className="flex-1">{props.entry.text1}</div>
