@@ -4,17 +4,6 @@ import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { sendMessage } from "../background/rpc";
 import { onMessage } from "./rpc";
 
-class Service {
-	get video() {
-		return document.querySelector<HTMLVideoElement>("video.html5-main-video")!;
-	}
-
-	play(time: number) {
-		this.video.currentTime = time;
-		setTimeout(() => this.video.play());
-	}
-}
-
 export async function main(ctx: ContentScriptContext) {
 	const videoId = parseVideoId(window.location.href);
 	if (!videoId) return;
@@ -46,17 +35,27 @@ export async function main(ctx: ContentScriptContext) {
 	onMessage("hide", () => ui.remove());
 
 	onMessage("getState", () => {
+		const video = service.getVideo();
 		return {
 			mounted,
-			playing: !service.video.paused,
-			time: service.video.currentTime,
+			playing: video?.paused ?? false,
+			time: video?.currentTime ?? 0,
 		};
 	});
 
-	const service = new Service();
+	const service = {
+		getVideo() {
+			return document.querySelector<HTMLVideoElement>("video.html5-main-video");
+		},
 
-	onMessage("fetchMetadata", async () => {
-		return fetchMetadataJson(videoId);
-	});
+		play(time: number) {
+			const video = this.getVideo();
+			if (!video) return;
+			video.currentTime = time;
+			setTimeout(() => video.play());
+		},
+	};
+
+	onMessage("fetchMetadata", () => fetchMetadataJson(videoId));
 	onMessage("play", ({ data }) => service.play(data));
 }
