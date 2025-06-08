@@ -1,28 +1,3 @@
-import { defineExtensionMessaging } from "@webext-core/messaging";
-import type { VideoMetadata } from "../../utils";
-
-// TODO: refactor
-interface ProtocolMap {
-	getState(): {
-		mounted: boolean;
-		playing: boolean;
-		time: number;
-	};
-
-	// ui
-	show(): void;
-	hide(): void;
-
-	// video player
-	play(time: number): void;
-
-	// youtube api proxy
-	fetchMetadata(videoId: string): Promise<VideoMetadata>;
-}
-
-export const { sendMessage, onMessage } =
-	defineExtensionMessaging<ProtocolMap>();
-
 import { createBirpc } from "birpc";
 import { browser } from "wxt/browser";
 import type { ContentService } from "./main";
@@ -32,10 +7,7 @@ export function registerContentService(contentService: ContentService) {
 		if (port.name === "content-rpc") {
 			const rpc = createBirpc<{}, ContentService>(contentService, {
 				bind: "functions",
-				post: (data) => {
-					// console.log("💚 [post]", data);
-					return port.postMessage(data);
-				},
+				post: (data) => port.postMessage(data),
 				on: (fn) => port.onMessage.addListener(fn),
 			});
 			port.onDisconnect.addListener(() => {
@@ -50,10 +22,7 @@ export function createContentServiceClient(tabId: number) {
 	const rpc = createBirpc<ContentService, {}>(
 		{},
 		{
-			post: (data) => {
-				// console.log("❤️ [post]", data);
-				return port.postMessage(data);
-			},
+			post: (data) => port.postMessage(data),
 			on: (fn) => port.onMessage.addListener(fn),
 		},
 	);
