@@ -1,44 +1,47 @@
 import { browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
+import { createShadowRootUi } from "wxt/utils/content-script-ui/shadow-root";
 import { registerRpcHandler } from "../../utils/rpc";
 import { fetchMetadataJson, parseVideoId } from "../../utils/youtube";
+import { mount } from "./ui";
 
-export class ContentService {
+export type { ContentService };
+
+class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
-	controlUI: ReturnType<typeof createIframeUi>;
+	controlUI!: Awaited<ReturnType<typeof createShadowRootUi>>;
 
 	constructor(
 		public ctx: ContentScriptContext,
 		public tabId: number,
-	) {
+	) {}
+
+	async init() {
 		this.ctx.addEventListener(window, "wxt:locationchange", (e) => {
 			const lastVideoId = parseVideoId(e.oldUrl.href);
 			const newVideoId = parseVideoId(e.newUrl.href);
 			if (lastVideoId !== newVideoId) {
 				this.hideUI();
 			}
-			this.controlUI.wrapper.hidden = !newVideoId;
+			this.showControlUI(!!newVideoId);
 		});
 
-		this.controlUI = createIframeUi(this.ctx, {
-			page: `content-iframe.html?tabId=${this.tabId}&control=true`,
+		this.controlUI = await createShadowRootUi(this.ctx, {
+			name: "ytsub-control-ui",
 			position: "inline",
 			anchor: "body",
-			onMount: (wrapper, iframe) => {
-				wrapper.style.position = "fixed";
-				wrapper.style.height = "50px";
-				wrapper.style.width = "50px";
-				wrapper.style.right = "20px";
-				wrapper.style.bottom = "20px";
-				wrapper.style.zIndex = "100000";
-				iframe.style.width = "100%";
-				iframe.style.height = "100%";
-				iframe.style.border = "none";
-				wrapper.hidden = !this.getPageState().videoId;
+			onMount: (container, _shadow, shadowHost) => {
+				shadowHost.style.position = "fixed";
+				shadowHost.style.zIndex = "100000";
+				shadowHost.style.right = "20px";
+				shadowHost.style.bottom = "20px";
+				shadowHost.style.background = "transparent";
+				mount(container, this);
 			},
 		});
 		this.controlUI.mount();
+		this.showControlUI(!!this.getPageState().videoId);
 	}
 
 	fetchMetadata(videoId: string) {
@@ -104,19 +107,24 @@ export class ContentService {
 			},
 		});
 		this.ui.mount();
-		this.controlUI.wrapper.hidden = true;
+		this.showControlUI(false);
 	}
 
 	hideUI() {
 		if (!this.ui) return;
 		this.ui.remove();
 		this.ui = undefined;
-		this.controlUI.wrapper.hidden = false;
+		this.showControlUI(true);
+	}
+
+	showControlUI(show: boolean) {
+		this.controlUI.shadowHost.hidden = !show;
 	}
 }
 
 export async function main(ctx: ContentScriptContext) {
 	const tabId = await browser.runtime.sendMessage("background-rpc-init");
 	const service = new ContentService(ctx, tabId);
+	await service.init();
 	registerRpcHandler("content-rpc", service);
 }
