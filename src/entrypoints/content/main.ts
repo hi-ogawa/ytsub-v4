@@ -2,14 +2,14 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { sendMessage } from "../background/rpc";
-import { onMessage } from "./rpc";
+import { onMessage, registerContentService } from "./rpc";
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
 
 	constructor(
-		private ctx: ContentScriptContext,
-		private tabId: number,
+		public ctx: ContentScriptContext,
+		public tabId: number,
 	) {
 		this.ctx.addEventListener(window, "wxt:locationchange", (e) => {
 			const lastVideoId = parseVideoId(e.oldUrl.href);
@@ -40,15 +40,13 @@ export class ContentService {
 		return {
 			playing: video?.paused ?? false,
 			time: video?.currentTime ?? 0,
-			loop: video?.loop ?? false,
 		};
 	}
 
-	playVideoAt(time: number) {
+	seek(time: number) {
 		const video = this.getVideo();
 		if (video) {
 			video.currentTime = time;
-			setTimeout(() => video.play());
 		}
 	}
 
@@ -88,6 +86,7 @@ export async function main(ctx: ContentScriptContext) {
 	const { tabId } = await sendMessage("initContent", undefined);
 
 	const service = new ContentService(ctx, tabId);
+	registerContentService(service);
 
 	onMessage("show", () => {
 		service.showUI();
@@ -111,5 +110,5 @@ export async function main(ctx: ContentScriptContext) {
 		return service.fetchMetadata(e.data);
 	});
 
-	onMessage("play", (e) => service.playVideoAt(e.data));
+	onMessage("play", (e) => service.seek(e.data));
 }

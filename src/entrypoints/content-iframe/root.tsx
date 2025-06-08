@@ -13,13 +13,15 @@ import {
 	fetchCaptionEntries,
 	stringifyTimestamp,
 } from "../../utils";
-import { sendMessage } from "../content/rpc";
+import { createContentServiceClient } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
 const searchParams = new URL(window.location.href).searchParams;
 const tabId = Number(searchParams.get("tabId"));
 const videoId = String(searchParams.get("videoId"));
+
+const rpc = createContentServiceClient(tabId);
 
 type VideoStorageData = {
 	lastSelected?: {
@@ -48,7 +50,7 @@ function RootInner() {
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
-			const metadata = await sendMessage("fetchMetadata", videoId, { tabId });
+			const metadata = await rpc.fetchMetadata(videoId);
 			const storageData = await videoStorage.getValue();
 			return { metadata, storageData };
 		},
@@ -154,9 +156,6 @@ function MainView(props: {
 						{/* TODO */}
 						{/* <li>
 							<span>Auto Scroll</span>
-						</li>
-						<li>
-							<span>Loop video</span>
 						</li> */}
 						<li
 							className={cls(!(language1 && language2) && "menu-disabled")}
@@ -166,7 +165,7 @@ function MainView(props: {
 						</li>
 						<li
 							onClick={async () => {
-								await sendMessage("hide", undefined, { tabId });
+								await rpc.hideUI();
 							}}
 						>
 							<span>Hide captions</span>
@@ -183,10 +182,9 @@ function CaptionsView(props: { captionEntries: CaptionEntry[] }) {
 	const query = useQuery({
 		queryKey: ["getState"],
 		queryFn: async () => {
-			const result = await sendMessage("getState", undefined, { tabId });
-			return result;
+			return rpc.getVideoState();
 		},
-		initialData: { playing: false, time: 0, mounted: true },
+		initialData: { playing: false, time: 0 },
 		refetchInterval: 200,
 	});
 	const state = query.data;
@@ -220,8 +218,7 @@ function CaptionEntryView(props: { entry: CaptionEntry; isCurrent: boolean }) {
 			onClick={async () => {
 				const selection = window.getSelection();
 				if (!selection || !selection.isCollapsed) return;
-
-				await sendMessage("play", props.entry.begin, { tabId });
+				await rpc.seek(props.entry.begin);
 			}}
 		>
 			<div className="text-xs text-gray-500">
