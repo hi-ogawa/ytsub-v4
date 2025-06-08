@@ -28,6 +28,7 @@ export class AsyncQueryStore<
 		private asyncOptions: {
 			initial: T;
 			get: () => Promise<T>;
+			set?: (newValue: T) => void | Promise<void>;
 			interval: number;
 		},
 	) {
@@ -39,5 +40,10 @@ export class AsyncQueryStore<
 	async refetch() {
 		const value = await this.asyncOptions.get();
 		this.setState(value);
+	}
+
+	async mutate(newValue: T) {
+		await this.asyncOptions.set?.(newValue);
+		await this.refetch();
 	}
 }

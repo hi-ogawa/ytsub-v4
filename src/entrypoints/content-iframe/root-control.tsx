@@ -7,17 +7,20 @@ const uiParams = new URL(window.location.href).searchParams;
 const tabId = Number(uiParams.get("tabId"));
 const rpc = createContentServiceClient(tabId);
 
-const store = new AsyncQueryStore({
+const uiStore = new AsyncQueryStore({
 	initial: false,
 	get: async () => {
 		const state = await rpc.getPageState();
 		return state.ui;
 	},
+	async set(v) {
+		await (v ? rpc.showUI() : rpc.hideUI());
+	},
 	interval: 200,
 });
 
 export function RootControl() {
-	const uiOpen = useStore(store);
+	const uiOpen = useStore(uiStore);
 	return (
 		<button
 			className={cls(
@@ -25,12 +28,7 @@ export function RootControl() {
 				uiOpen ? `bg-green-800/80` : `bg-green-500/90`,
 			)}
 			onClick={async () => {
-				if (uiOpen) {
-					await rpc.hideUI();
-				} else {
-					await rpc.showUI();
-				}
-				store.refetch();
+				await uiStore.mutate(!uiOpen);
 			}}
 		>
 			<span className="icon-[ri--translate-2] size-[20px] bg-white"></span>
