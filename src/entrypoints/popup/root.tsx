@@ -33,7 +33,7 @@ function RootInner() {
 			const state = await sendMessage("getState", undefined, { tabId: tab.id });
 			return { id: tab.id, mounted: state.mounted };
 		},
-		refetchInterval: 500,
+		refetchInterval: 200,
 	});
 	const state = query.data;
 

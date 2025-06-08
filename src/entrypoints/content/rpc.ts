@@ -25,7 +25,7 @@ export const { sendMessage, onMessage } =
 
 import { createBirpc } from "birpc";
 import { browser } from "wxt/browser";
-import type { ContentService } from "./main";
+import type { ContentService, ContentState } from "./main";
 
 export function registerContentService(contentService: ContentService) {
 	browser.runtime.onConnect.addListener((port) => {
@@ -61,4 +61,20 @@ export function createContentServiceClient(tabId: number) {
 		rpc.$close();
 	});
 	return rpc;
+}
+
+import { storage } from "wxt/utils/storage";
+
+type ContentStates = Record<number, ContentState>;
+
+export const contentStatesStorage = storage.defineItem<ContentStates>(
+	"session:content-states",
+	{
+		fallback: {},
+	},
+);
+
+export async function updateContentState(tabId: number, state: ContentState) {
+	const current = await contentStatesStorage.getValue();
+	await contentStatesStorage.setValue({ ...current, [tabId]: state });
 }

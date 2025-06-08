@@ -2,7 +2,9 @@ import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { fetchMetadataJson, parseVideoId } from "../../utils";
 import { sendMessage } from "../background/rpc";
-import { onMessage, registerContentService } from "./rpc";
+import { onMessage, registerContentService, updateContentState } from "./rpc";
+
+export type ContentState = ReturnType<ContentService["getContentState"]>;
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
@@ -17,6 +19,7 @@ export class ContentService {
 			if (lastVideoId !== newVideoId) {
 				this.hideUI();
 			}
+			this.updateContentState();
 		});
 	}
 
@@ -24,11 +27,15 @@ export class ContentService {
 		return fetchMetadataJson(videoId);
 	}
 
-	getPageState() {
+	getContentState() {
 		return {
 			videoId: parseVideoId(window.location.href),
-			mounted: !!this.ui,
+			ui: !!this.ui,
 		};
+	}
+
+	updateContentState() {
+		updateContentState(this.tabId, this.getContentState());
 	}
 
 	getVideo() {
@@ -51,8 +58,9 @@ export class ContentService {
 	}
 
 	showUI() {
+		if (this.ui) return;
 		const video = this.getVideo();
-		const { videoId } = this.getPageState();
+		const { videoId } = this.getContentState();
 		if (!videoId || !video) {
 			return;
 		}
@@ -74,11 +82,14 @@ export class ContentService {
 			},
 		});
 		this.ui.mount();
+		this.updateContentState();
 	}
 
 	hideUI() {
-		this.ui?.remove();
+		if (!this.ui) return;
+		this.ui.remove();
 		this.ui = undefined;
+		this.updateContentState();
 	}
 }
 
@@ -97,7 +108,7 @@ export async function main(ctx: ContentScriptContext) {
 	});
 
 	onMessage("getState", () => {
-		const { mounted } = service.getPageState();
+		const { ui: mounted } = service.getContentState();
 		const { playing, time } = service.getVideoState();
 		return {
 			mounted,
