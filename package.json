@@ -1,6 +1,6 @@
 {
 	"name": "ytsub",
-	"version": "0.0.0-pre.10",
+	"version": "0.0.0-pre.11",
 	"private": true,
 	"description": "manifest.json description",
 	"type": "module",
@@ -14,12 +14,6 @@
 		"lint": "biome check --write .",
 		"lint-check": "biome check ."
 	},
-	"dependencies": {
-		"@types/react": "^19.1.6",
-		"@types/react-dom": "^19.1.5",
-		"react": "^19.1.0",
-		"react-dom": "^19.1.0"
-	},
 	"devDependencies": {
 		"@biomejs/biome": "2.0.0-beta.5",
 		"@hiogawa/utils": "^1.7.0",
@@ -28,13 +22,16 @@
 		"@tailwindcss/vite": "^4.1.8",
 		"@tanstack/react-query": "^5.80.6",
 		"@tsconfig/strictest": "^2.0.5",
+		"@types/react": "^19.1.6",
+		"@types/react-dom": "^19.1.5",
 		"@types/webextension-polyfill": "^0.12.3",
 		"@vitejs/plugin-react": "^4.5.0",
 		"@webext-core/messaging": "^2.2.0",
 		"@wxt-dev/auto-icons": "^1.0.2",
-		"@wxt-dev/storage": "^1.1.1",
 		"birpc": "^2.3.0",
 		"daisyui": "^5.0.43",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
 		"tailwindcss": "^4.1.8",
 		"typescript": "^5.8.3",
 		"vite": "^6.3.5",
