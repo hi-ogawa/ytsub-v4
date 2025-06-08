@@ -48,7 +48,7 @@ function RootInner() {
 	const query = useQuery({
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
-			const metadata = await sendMessage("fetchMetadata", undefined, { tabId });
+			const metadata = await sendMessage("fetchMetadata", videoId, { tabId });
 			const storageData = await videoStorage.getValue();
 			return { metadata, storageData };
 		},
