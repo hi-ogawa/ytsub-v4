@@ -12,7 +12,6 @@ import {
 	captionTrackName,
 	fetchCaptionEntries,
 	stringifyTimestamp,
-	type VideoMetadata,
 } from "../../utils";
 import { sendMessage } from "../content/rpc";
 
@@ -30,9 +29,12 @@ type VideoCache = {
 	};
 };
 
-const videoCache = storage.defineItem<VideoCache>(`local:video-${videoId}`, {
-	fallback: {},
-});
+const videoCacheStorage = storage.defineItem<VideoCache>(
+	`local:video-${videoId}`,
+	{
+		fallback: {},
+	},
+);
 
 export function Root() {
 	return (
@@ -47,7 +49,7 @@ function RootInner() {
 		queryKey: ["fetchMetadata"],
 		queryFn: async () => {
 			const metadata = await sendMessage("fetchMetadata", undefined, { tabId });
-			const cache = await videoCache.getValue();
+			const cache = await videoCacheStorage.getValue();
 			return { metadata, cache };
 		},
 		staleTime: Infinity,
@@ -58,40 +60,51 @@ function RootInner() {
 		<div className="p-2 flex flex-col gap-2">
 			{query.isError && (
 				<div role="alert" className="alert alert-error alert-soft text-sm">
-					<span>Failed to load captions data</span>
+					<span>Failed to load captions</span>
 				</div>
 			)}
-			{query.data && <MainView {...query.data} />}
+			{query.isSuccess &&
+				(() => {
+					const captionTracks =
+						query.data.metadata.captions?.playerCaptionsTracklistRenderer
+							.captionTracks;
+					if (!captionTracks || captionTracks.length === 0) {
+						return (
+							<div
+								role="alert"
+								className="alert alert-error alert-soft text-sm"
+							>
+								<span>Failed to load captions</span>
+							</div>
+						);
+					}
+					return (
+						<MainView captionTracks={captionTracks} cache={query.data.cache} />
+					);
+				})()}
 		</div>
 	);
 }
 
-function MainView(props: { metadata: VideoMetadata; cache: VideoCache }) {
-	const captionTracks =
-		props.metadata.captions?.playerCaptionsTracklistRenderer.captionTracks;
+function MainView(props: {
+	captionTracks: CaptionTrackMetadata[];
+	cache: VideoCache;
+}) {
+	const captionTracks = props.captionTracks;
 	const lastData = props.cache.lastData;
-
-	const [lang1, setLang1] = React.useState<CaptionTrackMetadata | undefined>(
-		() => {
-			if (captionTracks && lastData?.lang1) {
-				return captionTracks.find((e) => e.vssId === lastData.lang1.vssId);
-			}
-		},
+	const [lang1, setLang1] = React.useState(
+		() =>
+			lastData?.lang1 &&
+			captionTracks.find((e) => e.vssId === lastData.lang1.vssId),
 	);
-	const [lang2, setLang2] = React.useState<CaptionTrackMetadata | undefined>(
-		() => {
-			if (captionTracks && lastData?.lang2) {
-				return captionTracks.find((e) => e.vssId === lastData.lang2.vssId);
-			}
-		},
+	const [lang2, setLang2] = React.useState(
+		() =>
+			lastData?.lang2 &&
+			captionTracks.find((e) => e.vssId === lastData.lang2.vssId),
 	);
-	const [captionEntries, setCaptionEntries] = React.useState<
-		CaptionEntry[] | undefined
-	>(lastData?.captionEntries);
-
-	if (!captionTracks) {
-		return <div>No captions available.</div>;
-	}
+	const [captionEntries, setCaptionEntries] = React.useState(
+		lastData?.captionEntries,
+	);
 
 	return (
 		<>
@@ -119,7 +132,7 @@ function MainView(props: { metadata: VideoMetadata; cache: VideoCache }) {
 							language2: lang2,
 						});
 						setCaptionEntries(result);
-						videoCache.setValue({
+						videoCacheStorage.setValue({
 							lastData: {
 								lang1,
 								lang2,
