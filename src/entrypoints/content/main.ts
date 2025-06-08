@@ -1,7 +1,7 @@
+import { browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { fetchMetadataJson, parseVideoId } from "../../utils";
-import { sendMessage } from "../background/rpc";
 import { registerContentService } from "./rpc";
 
 export class ContentService {
@@ -108,7 +108,7 @@ export class ContentService {
 }
 
 export async function main(ctx: ContentScriptContext) {
-	const { tabId } = await sendMessage("initContent", undefined);
+	const tabId = await browser.runtime.sendMessage("background-rpc-init");
 	const service = new ContentService(ctx, tabId);
 	registerContentService(service);
 }
