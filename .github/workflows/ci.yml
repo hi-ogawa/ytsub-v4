@@ -23,8 +23,7 @@ jobs:
       - run: pnpm build
       - run: pnpm tsc
       - run: pnpm test
-      - run: ls .output/*.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: build
+          name: ytsub
           path: .output/chrome-mv3/**/*
