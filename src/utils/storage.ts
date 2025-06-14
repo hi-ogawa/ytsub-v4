@@ -41,9 +41,4 @@ export class AsyncQueryStore<
 		const value = await this.asyncOptions.get();
 		this.setState(value);
 	}
-
-	async mutate(newValue: T) {
-		await this.asyncOptions.set?.(newValue);
-		await this.refetch();
-	}
 }
