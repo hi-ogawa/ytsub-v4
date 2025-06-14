@@ -21,6 +21,13 @@ export class ContentService {
 			this.controlUI.wrapper.hidden = !newVideoId;
 		});
 
+		// TODO: close UI when full screen mode?
+		// setInterval(() => {
+		// 	if (document.fullscreenElement) {
+		// 		this.controlUI.wrapper.hidden = true;
+		// 	}
+		// }, 200);
+
 		this.controlUI = createIframeUi(this.ctx, {
 			page: `content-iframe.html?tabId=${this.tabId}&control=true`,
 			position: "inline",
