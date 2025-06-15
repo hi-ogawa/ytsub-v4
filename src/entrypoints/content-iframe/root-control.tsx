@@ -7,29 +7,30 @@ const uiParams = new URL(window.location.href).searchParams;
 const tabId = Number(uiParams.get("tabId"));
 const rpc = createContentServiceClient(tabId);
 
-const uiStore = new AsyncQueryStore({
-	initial: false,
-	get: async () => {
-		const state = await rpc.getPageState();
-		return state.ui;
-	},
-	async set(v) {
-		await (v ? rpc.showUI() : rpc.hideUI());
+const pageStateStore = new AsyncQueryStore({
+	get: () => rpc.getPageState(),
+	initial: {
+		ui: false,
+		videoId: undefined,
 	},
 	interval: 200,
 });
 
 export function RootControl() {
-	const uiOpen = useStore(uiStore);
+	const pageState = useStore(pageStateStore);
+
+	async function toggleUi() {
+		await (pageState.ui ? rpc.hideUI() : rpc.showUI());
+		await pageStateStore.refetch();
+	}
+
 	return (
 		<button
 			className={cls(
 				`flex justify-center items-center cursor-pointer w-full h-full rounded-full border-0 hover:brightness-105 transition`,
-				uiOpen ? `bg-green-800/80` : `bg-green-500/90`,
+				pageState.ui ? `bg-green-800/80` : `bg-green-500/90`,
 			)}
-			onClick={async () => {
-				await uiStore.mutate(!uiOpen);
-			}}
+			onClick={() => toggleUi()}
 		>
 			<span className="icon-[ri--translate-2] size-[20px] bg-white"></span>
 		</button>

@@ -21,6 +21,13 @@ export class ContentService {
 			this.controlUI.wrapper.hidden = !newVideoId;
 		});
 
+		// TODO: close UI when full screen mode?
+		// setInterval(() => {
+		// 	if (document.fullscreenElement) {
+		// 		this.controlUI.wrapper.hidden = true;
+		// 	}
+		// }, 200);
+
 		this.controlUI = createIframeUi(this.ctx, {
 			page: `content-iframe.html?tabId=${this.tabId}&control=true`,
 			position: "inline",
@@ -30,7 +37,7 @@ export class ContentService {
 				wrapper.style.height = "45px";
 				wrapper.style.width = "45px";
 				wrapper.style.right = "15px";
-				wrapper.style.bottom = "12px";
+				wrapper.style.bottom = "15px";
 				wrapper.style.zIndex = "100000";
 				iframe.style.width = "100%";
 				iframe.style.height = "100%";
@@ -94,8 +101,8 @@ export class ContentService {
 			anchor: "body",
 			onMount: (wrapper, iframe) => {
 				wrapper.style.position = "fixed";
-				wrapper.style.top = "60px";
-				wrapper.style.bottom = "60px";
+				wrapper.style.top = "65px";
+				wrapper.style.bottom = "65px";
 				wrapper.style.right = "10px";
 				wrapper.style.width = "480px";
 				wrapper.style.zIndex = "100000";
