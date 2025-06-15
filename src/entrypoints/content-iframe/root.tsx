@@ -176,11 +176,23 @@ function MainView(props: {
 								{autoScroll && <span className="icon-[ri--check-line]"></span>}
 							</span>
 						</li>
-						<li onClick={async () => {}}>
-							<span className="flex items-center">
+						<li>
+							<span className="flex items-center gap-2.5">
 								<span className="flex-1">Resize</span>
-								<span className="icon-[ri--check-line]"></span>
-								<span className="icon-[ri--check-line]"></span>
+								<span
+									className="icon-[ri--subtract-line]"
+									onClick={() => {
+										// TODO
+										// rpc.resizeUI(-10)
+									}}
+								></span>
+								<span
+									className="icon-[ri--add-line]"
+									onClick={() => {
+										// TODO
+										// rpc.resizeUI(+10)
+									}}
+								></span>
 							</span>
 						</li>
 						<li
