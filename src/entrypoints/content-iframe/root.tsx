@@ -142,7 +142,10 @@ function MainView(props: {
 	}, [language1, language2]);
 
 	return (
-		<>
+		<div className="flex flex-col gap-2 h-full justify-end">
+			{captionEntries && (
+				<CaptionsView captionEntries={captionEntries} autoScroll={autoScroll} />
+			)}
 			<div className="flex gap-2 items-stretch">
 				<SelectWrapper
 					className="select"
@@ -158,7 +161,7 @@ function MainView(props: {
 					onChange={(e) => setLanguage2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
-				<details className="dropdown dropdown-end">
+				<details className="dropdown dropdown-top dropdown-end">
 					<summary className="btn p-2">
 						<span className="icon-[ri--settings-3-line] text-lg"></span>
 					</summary>
@@ -183,10 +186,7 @@ function MainView(props: {
 					</ul>
 				</details>
 			</div>
-			{captionEntries && (
-				<CaptionsView captionEntries={captionEntries} autoScroll={autoScroll} />
-			)}
-		</>
+		</div>
 	);
 }
 
