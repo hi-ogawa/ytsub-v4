@@ -106,7 +106,7 @@ function MainView(props: {
 }) {
 	const captionTracks = props.captionTracks;
 	const lastData = props.storageData.lastSelected;
-	const [language1, setLanauge2] = React.useState(
+	const [language1, setLanguage1] = React.useState(
 		() =>
 			lastData?.language1 &&
 			captionTracks.find((e) => e.vssId === lastData.language1.vssId),
@@ -151,7 +151,7 @@ function MainView(props: {
 					className="select"
 					value={language1}
 					options={[undefined, ...captionTracks]}
-					onChange={(e) => setLanauge2(e)}
+					onChange={(e) => setLanguage1(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<SelectWrapper
@@ -175,6 +175,16 @@ function MainView(props: {
 								<span className="flex-1">Auto Scroll</span>
 								{autoScroll && <span className="icon-[ri--check-line]"></span>}
 							</span>
+						</li>
+						<li
+							onClick={async () => {
+								setLanguage1(undefined);
+								setLanguage2(undefined);
+								setCaptionEntries([]);
+								await videoStorage.setValue({ lastSelected: undefined });
+							}}
+						>
+							<span>Reset</span>
 						</li>
 					</ul>
 				</details>
