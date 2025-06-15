@@ -182,15 +182,13 @@ function MainView(props: {
 								<span
 									className="icon-[ri--subtract-line]"
 									onClick={() => {
-										// TODO
-										// rpc.resizeUI(-10)
+										rpc.resizeUI(-20);
 									}}
 								></span>
 								<span
 									className="icon-[ri--add-line]"
 									onClick={() => {
-										// TODO
-										// rpc.resizeUI(+10)
+										rpc.resizeUI(+20);
 									}}
 								></span>
 							</span>
