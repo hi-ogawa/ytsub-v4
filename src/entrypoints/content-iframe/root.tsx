@@ -176,6 +176,23 @@ function MainView(props: {
 								{autoScroll && <span className="icon-[ri--check-line]"></span>}
 							</span>
 						</li>
+						<li>
+							<span className="flex items-center gap-2.5">
+								<span className="flex-1">Resize</span>
+								<span
+									className="icon-[ri--subtract-line]"
+									onClick={() => {
+										rpc.resizeUI(-20);
+									}}
+								></span>
+								<span
+									className="icon-[ri--add-line]"
+									onClick={() => {
+										rpc.resizeUI(+20);
+									}}
+								></span>
+							</span>
+						</li>
 						<li
 							onClick={async () => {
 								setLanguage1(undefined);
@@ -336,14 +353,23 @@ function CaptionEntryView(props: {
 					/>
 					<span
 						className={cls(
-							"icon-[ri--repeat-line] cursor-pointer",
+							"icon-[ri--repeat-line] w-3.5 h-3.5 cursor-pointer",
 							props.isLooping
 								? "text-blue-700 scale-110"
-								: "text-gray-500 hover:text-gray-700",
+								: "text-gray-500 hover:text-gray-700 hover:scale-110",
 						)}
 						onClick={(e) => {
 							e.stopPropagation();
 							props.setLoopEntry(props.isLooping ? undefined : props.entry);
+						}}
+					></span>
+					<span
+						className={cls(
+							"icon-[ri--play-circle-line] w-3.5 h-3.5 cursor-pointer text-gray-500 hover:text-gray-700 hover:scale-110",
+						)}
+						onClick={async (e) => {
+							e.stopPropagation();
+							await rpc.seek(props.entry.begin);
 						}}
 					></span>
 				</span>

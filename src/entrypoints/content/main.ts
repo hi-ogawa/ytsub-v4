@@ -119,6 +119,16 @@ export class ContentService {
 		this.ui.remove();
 		this.ui = undefined;
 	}
+
+	// TODO: save UI size in storage
+	resizeUI(diff: number) {
+		if (!this.ui) return;
+		const wrapper = this.ui.wrapper;
+		const width = parseInt(wrapper.style.width, 10);
+		const height = parseInt(wrapper.style.height, 10);
+		wrapper.style.width = `${width + diff}px`;
+		wrapper.style.height = `${height + diff}px`;
+	}
 }
 
 export async function main(ctx: ContentScriptContext) {
