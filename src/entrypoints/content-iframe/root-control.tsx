@@ -32,7 +32,12 @@ export function RootControl() {
 			)}
 			onClick={() => toggleUi()}
 		>
-			<span className="icon-[ri--translate-2] size-[20px] bg-white"></span>
+			<span
+				className={cls(
+					"size-[20px] bg-white",
+					pageState.ui ? "icon-[ri--close-line]" : "icon-[ri--translate-2]",
+				)}
+			></span>
 		</button>
 	);
 }
