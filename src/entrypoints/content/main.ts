@@ -1,8 +1,8 @@
-import { browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
-import { registerRpcHandler } from "../../utils/rpc";
+import { createRpcClient, registerRpcHandler } from "../../utils/rpc";
 import { fetchMetadataJson, parseVideoId } from "../../utils/youtube";
+import type { BackgroundService } from "../background/main";
 
 export class ContentService {
 	ui?: ReturnType<typeof createIframeUi>;
@@ -87,7 +87,7 @@ export class ContentService {
 		video.currentTime = time;
 	}
 
-	showUI() {
+	async showUI() {
 		if (this.ui) return;
 		const video = this.getVideo();
 		const { videoId } = this.getPageState();
@@ -95,16 +95,17 @@ export class ContentService {
 			return;
 		}
 		video.loop = true;
+		const width = await bgRpc.getUiWidth();
 		this.ui = createIframeUi(this.ctx, {
 			page: `content-iframe.html?tabId=${this.tabId}&videoId=${videoId}`,
 			position: "inline",
 			anchor: "body",
-			onMount: (wrapper, iframe) => {
+			onMount: async (wrapper, iframe) => {
 				wrapper.style.position = "fixed";
 				wrapper.style.top = "65px";
 				wrapper.style.bottom = "65px";
 				wrapper.style.right = "10px";
-				wrapper.style.width = "480px";
+				wrapper.style.width = `${width}px`;
 				wrapper.style.zIndex = "100000";
 				iframe.style.width = "100%";
 				iframe.style.height = "100%";
@@ -120,19 +121,25 @@ export class ContentService {
 		this.ui = undefined;
 	}
 
-	// TODO: save UI size in storage
-	resizeUI(diff: number) {
+	async resizeUI(diff: number) {
 		if (!this.ui) return;
-		const wrapper = this.ui.wrapper;
-		const width = parseInt(wrapper.style.width, 10);
-		const height = parseInt(wrapper.style.height, 10);
-		wrapper.style.width = `${width + diff}px`;
-		wrapper.style.height = `${height + diff}px`;
+		const width = parseInt(this.ui.wrapper.style.width, 10);
+		const newWidth = width + diff;
+		this.ui.wrapper.style.width = `${newWidth}px`;
+		await bgRpc.setUiWidth(newWidth);
 	}
 }
 
+const tabIdPromise = Promise.withResolvers<number>();
+
+const bgRpc = createRpcClient<BackgroundService>("background-rpc", undefined, {
+	onConnect: (tabId) => {
+		tabIdPromise.resolve(tabId!);
+	},
+});
+
 export async function main(ctx: ContentScriptContext) {
-	const tabId = await browser.runtime.sendMessage("background-rpc-init");
+	const tabId = await tabIdPromise.promise;
 	const service = new ContentService(ctx, tabId);
 	registerRpcHandler("content-rpc", service);
 }
