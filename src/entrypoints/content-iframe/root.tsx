@@ -106,7 +106,7 @@ function MainView(props: {
 }) {
 	const captionTracks = props.captionTracks;
 	const lastData = props.storageData.lastSelected;
-	const [language1, setLanauge2] = React.useState(
+	const [language1, setLanguage1] = React.useState(
 		() =>
 			lastData?.language1 &&
 			captionTracks.find((e) => e.vssId === lastData.language1.vssId),
@@ -142,13 +142,16 @@ function MainView(props: {
 	}, [language1, language2]);
 
 	return (
-		<>
+		<div className="flex flex-col gap-2 h-full justify-end">
+			{captionEntries && (
+				<CaptionsView captionEntries={captionEntries} autoScroll={autoScroll} />
+			)}
 			<div className="flex gap-2 items-stretch">
 				<SelectWrapper
 					className="select"
 					value={language1}
 					options={[undefined, ...captionTracks]}
-					onChange={(e) => setLanauge2(e)}
+					onChange={(e) => setLanguage1(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
 				<SelectWrapper
@@ -158,7 +161,7 @@ function MainView(props: {
 					onChange={(e) => setLanguage2(e)}
 					labelFn={(e) => (e ? captionTrackName(e) : "-- select --")}
 				/>
-				<details className="dropdown dropdown-end">
+				<details className="dropdown dropdown-top dropdown-end">
 					<summary className="btn p-2">
 						<span className="icon-[ri--settings-3-line] text-lg"></span>
 					</summary>
@@ -175,18 +178,18 @@ function MainView(props: {
 						</li>
 						<li
 							onClick={async () => {
-								await rpc.hideUI();
+								setLanguage1(undefined);
+								setLanguage2(undefined);
+								setCaptionEntries([]);
+								await videoStorage.setValue({ lastSelected: undefined });
 							}}
 						>
-							<span>Close</span>
+							<span>Reset</span>
 						</li>
 					</ul>
 				</details>
 			</div>
-			{captionEntries && (
-				<CaptionsView captionEntries={captionEntries} autoScroll={autoScroll} />
-			)}
-		</>
+		</div>
 	);
 }
 
@@ -211,8 +214,12 @@ function CaptionsView({
 		[captionEntries, state.time],
 	);
 
+	const isManualScroll = React.useRef(false);
+	const setDebouncedTimeout = useDebouncedTimeout();
+
+	// auto scroll to current entry
 	React.useEffect(() => {
-		if (!autoScroll || !currentEntry) return;
+		if (!autoScroll || !currentEntry || isManualScroll.current) return;
 		const element = document.querySelector(
 			`[data-entry-index="${currentEntry.index}"]`,
 		);
@@ -238,14 +245,21 @@ function CaptionsView({
 	const [loopEntry, setLoopEntry] = React.useState<CaptionEntry>();
 
 	React.useEffect(() => {
-		// TODO: throttle while manual scrolling
 		if (loopEntry && currentEntry !== loopEntry) {
 			rpc.seek(loopEntry.begin);
 		}
 	}, [loopEntry, state.time]);
 
 	return (
-		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
+		<div
+			className="flex flex-col gap-2 text-sm overflow-y-auto"
+			onWheel={() => {
+				isManualScroll.current = true;
+				setDebouncedTimeout(() => {
+					isManualScroll.current = false;
+				}, 2000);
+			}}
+		>
 			{captionEntries.map((e) => (
 				<CaptionEntryView
 					key={e.index}
@@ -258,6 +272,19 @@ function CaptionsView({
 			))}
 		</div>
 	);
+}
+
+function useDebouncedTimeout() {
+	const ref = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+	return (callback: () => void, timeoutMs: number) => {
+		if (ref.current !== null) {
+			clearTimeout(ref.current);
+		}
+		ref.current = setTimeout(() => {
+			callback();
+			ref.current = null;
+		}, timeoutMs);
+	};
 }
 
 function CaptionEntryView(props: {
