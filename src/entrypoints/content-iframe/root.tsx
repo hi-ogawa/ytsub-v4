@@ -214,10 +214,12 @@ function CaptionsView({
 		[captionEntries, state.time],
 	);
 
+	const isManualScroll = React.useRef(false);
+	const setDebouncedTimeout = useDebouncedTimeout();
+
 	// auto scroll to current entry
-	// TODO: disable when manually scrolling
 	React.useEffect(() => {
-		if (!autoScroll || !currentEntry) return;
+		if (!autoScroll || !currentEntry || isManualScroll.current) return;
 		const element = document.querySelector(
 			`[data-entry-index="${currentEntry.index}"]`,
 		);
@@ -249,7 +251,15 @@ function CaptionsView({
 	}, [loopEntry, state.time]);
 
 	return (
-		<div className="flex flex-col gap-2 text-sm overflow-y-auto">
+		<div
+			className="flex flex-col gap-2 text-sm overflow-y-auto"
+			onWheel={() => {
+				isManualScroll.current = true;
+				setDebouncedTimeout(() => {
+					isManualScroll.current = false;
+				}, 2000);
+			}}
+		>
 			{captionEntries.map((e) => (
 				<CaptionEntryView
 					key={e.index}
@@ -262,6 +272,19 @@ function CaptionsView({
 			))}
 		</div>
 	);
+}
+
+function useDebouncedTimeout() {
+	const ref = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+	return (callback: () => void, timeoutMs: number) => {
+		if (ref.current !== null) {
+			clearTimeout(ref.current);
+		}
+		ref.current = setTimeout(() => {
+			callback();
+			ref.current = null;
+		}, timeoutMs);
+	};
 }
 
 function CaptionEntryView(props: {
