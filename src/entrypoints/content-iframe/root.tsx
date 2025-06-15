@@ -211,6 +211,8 @@ function CaptionsView({
 		[captionEntries, state.time],
 	);
 
+	// auto scroll to current entry
+	// TODO: disable when manually scrolling
 	React.useEffect(() => {
 		if (!autoScroll || !currentEntry) return;
 		const element = document.querySelector(
@@ -238,7 +240,6 @@ function CaptionsView({
 	const [loopEntry, setLoopEntry] = React.useState<CaptionEntry>();
 
 	React.useEffect(() => {
-		// TODO: throttle while manual scrolling
 		if (loopEntry && currentEntry !== loopEntry) {
 			rpc.seek(loopEntry.begin);
 		}
