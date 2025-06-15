@@ -176,13 +176,6 @@ function MainView(props: {
 								{autoScroll && <span className="icon-[ri--check-line]"></span>}
 							</span>
 						</li>
-						<li
-							onClick={async () => {
-								await rpc.hideUI();
-							}}
-						>
-							<span>Close</span>
-						</li>
 					</ul>
 				</details>
 			</div>
