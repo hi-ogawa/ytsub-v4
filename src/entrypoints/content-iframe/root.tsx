@@ -200,6 +200,26 @@ function MainView(props: {
 						</li>
 						<li
 							onClick={async () => {
+								if (!captionEntries || !language1 || !language2) return;
+								let result = "";
+								result += `| ${captionTrackName(language1)} | ${captionTrackName(language2)} |\n`;
+								result += `| --- | --- |\n`;
+								for (const e of captionEntries) {
+									result += `| `;
+									result += [e.text1, e.text2]
+										.map((t) => t.replace(/\|/g, "_").replace(/\s/g, " "))
+										.join(" | ");
+									result += ` |\n`;
+								}
+								await rpc.writeToClipboard(result);
+							}}
+						>
+							<span className="flex items-center">
+								<span className="flex-1">Copy</span>
+							</span>
+						</li>
+						<li
+							onClick={async () => {
 								setLanguage1(undefined);
 								setLanguage2(undefined);
 								setCaptionEntries([]);

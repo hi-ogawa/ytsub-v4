@@ -128,6 +128,10 @@ export class ContentService {
 		this.ui.wrapper.style.width = `${newWidth}px`;
 		await bgRpc.setUiWidth(newWidth);
 	}
+
+	async writeToClipboard(text: string) {
+		await navigator.clipboard.writeText(text);
+	}
 }
 
 const tabIdPromise = Promise.withResolvers<number>();
