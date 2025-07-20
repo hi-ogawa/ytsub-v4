@@ -199,6 +199,15 @@ function MainView(props: {
 							</span>
 						</li>
 						<li
+							onClick={() => {
+								// TODO
+							}}
+						>
+							<span className="flex items-center">
+								<span className="flex-1">Copy</span>
+							</span>
+						</li>
+						<li
 							onClick={async () => {
 								setLanguage1(undefined);
 								setLanguage2(undefined);
