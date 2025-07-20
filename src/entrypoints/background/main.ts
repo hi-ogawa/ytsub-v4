@@ -1,9 +1,24 @@
-import { browser } from "wxt/browser";
+import { storage } from "wxt/utils/storage";
+import { registerRpcHandler } from "../../utils/rpc";
+
+const uiWidthStorage = storage.defineItem(`local:ui-size`, {
+	fallback: 480,
+});
+
+export type { BackgroundService };
+
+class BackgroundService {
+	async getUiWidth() {
+		return uiWidthStorage.getValue();
+	}
+
+	async setUiWidth(width: number) {
+		await uiWidthStorage.setValue(width);
+	}
+}
 
 export async function main() {
-	browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		if (message === "background-rpc-init") {
-			sendResponse(sender.tab?.id);
-		}
+	registerRpcHandler("background-rpc", new BackgroundService(), {
+		onConnect: true,
 	});
 }
