@@ -200,10 +200,16 @@ function MainView(props: {
 						</li>
 						<li
 							onClick={async () => {
-								if (!captionEntries) return;
+								if (!captionEntries || !language1 || !language2) return;
 								let result = "";
+								result += `| ${captionTrackName(language1)} | ${captionTrackName(language2)} |\n`;
+								result += `| --- | --- |\n`;
 								for (const e of captionEntries) {
-									result += `| ${e.text1} | ${e.text2} |\n`;
+									result += `| `;
+									result += [e.text1, e.text2]
+										.map((t) => t.replace(/\|/g, "_").replace(/\s/g, " "))
+										.join(" | ");
+									result += ` |\n`;
 								}
 								await rpc.writeToClipboard(result);
 							}}
