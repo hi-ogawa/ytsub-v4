@@ -143,7 +143,6 @@ async function getVisitorData(videoId: string) {
 	return visitorData;
 }
 
-
 export function parseVideoId(value: string): string | undefined {
 	if (value.length === 11) {
 		return value;
