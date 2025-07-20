@@ -6,7 +6,7 @@ export default defineConfig({
 	srcDir: "./src",
 	manifest: (env) => ({
 		name: env.command === "build" ? "ytsub" : "ytsub (dev)",
-		permissions: ["activeTab", "storage"],
+		permissions: ["activeTab", "storage", "clipboardWrite"],
 		web_accessible_resources: [
 			{
 				resources: ["content-iframe.html"],

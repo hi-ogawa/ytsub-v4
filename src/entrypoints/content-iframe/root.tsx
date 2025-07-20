@@ -199,8 +199,13 @@ function MainView(props: {
 							</span>
 						</li>
 						<li
-							onClick={() => {
-								// TODO
+							onClick={async () => {
+								if (!captionEntries) return;
+								let result = "";
+								for (const e of captionEntries) {
+									result += `| ${e.text1} | ${e.text2} |\n`;
+								}
+								await rpc.writeToClipboard(result);
 							}}
 						>
 							<span className="flex items-center">
