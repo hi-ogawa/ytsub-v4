@@ -58,6 +58,7 @@ export interface CaptionEntry {
 	end: number;
 	text1: string;
 	text2: string;
+	endLocked?: boolean;
 }
 
 export async function fetchMetadataJson(
