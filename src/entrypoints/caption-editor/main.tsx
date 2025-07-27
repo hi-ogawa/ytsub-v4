@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { browser } from "wxt/browser";
 import "./style.css";
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
 	React.useEffect(() => {
 		const handleMessage = (
 			message: any,
-			sender: chrome.runtime.MessageSender,
+			sender: any,
 			sendResponse: Function,
 		) => {
 			console.log("Received message:", message, "from:", sender);
@@ -74,8 +75,8 @@ function App() {
 			}
 		};
 
-		chrome.runtime.onMessage.addListener(handleMessage);
-		return () => chrome.runtime.onMessage.removeListener(handleMessage);
+		browser.runtime.onMessage.addListener(handleMessage);
+		return () => browser.runtime.onMessage.removeListener(handleMessage);
 	}, [pendingRequests]);
 
 	const sendMessageToIframe = (action: string, payload: any): Promise<any> => {
@@ -92,7 +93,7 @@ function App() {
 			);
 
 			// Send message directly to the iframe tab and frame
-			chrome.tabs.sendMessage(
+			browser.tabs.sendMessage(
 				iframeSender.tabId,
 				{
 					type: "YOUTUBE_API_REQUEST",
@@ -102,14 +103,14 @@ function App() {
 				},
 				{ frameId: iframeSender.frameId },
 				(response) => {
-					if (chrome.runtime.lastError) {
-						console.error("Message sending failed:", chrome.runtime.lastError);
+					if (browser.runtime.lastError) {
+						console.error("Message sending failed:", browser.runtime.lastError);
 						setPendingRequests((prev) => {
 							const newMap = new Map(prev);
 							newMap.delete(requestId);
 							return newMap;
 						});
-						reject(new Error(chrome.runtime.lastError.message));
+						reject(new Error(browser.runtime.lastError.message));
 					}
 					console.log("Message sent to iframe, response:", response);
 				},

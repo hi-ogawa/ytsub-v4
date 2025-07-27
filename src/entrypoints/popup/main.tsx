@@ -1,20 +1,21 @@
 import ReactDOM from "react-dom/client";
+import { browser } from "wxt/browser";
 import "../../styles.css";
 
 function Popup() {
 	const openCaptionEditor = async () => {
 		try {
-			const [tab] = await chrome.tabs.query({
+			const [tab] = await browser.tabs.query({
 				active: true,
 				currentWindow: true,
 			});
 
-			if (!tab.url?.includes("youtube.com/watch")) {
+			if (!tab?.url?.includes("youtube.com/watch")) {
 				alert("Please open a YouTube video first");
 				return;
 			}
 
-			const url = new URL(tab.url);
+			const url = new URL(tab.url!);
 			const videoId = url.searchParams.get("v");
 
 			if (!videoId) {
@@ -22,10 +23,8 @@ function Popup() {
 				return;
 			}
 
-			const extensionUrl = chrome.runtime.getURL(
-				`caption-editor.html?v=${videoId}`,
-			);
-			await chrome.tabs.create({ url: extensionUrl });
+			const extensionUrl = `chrome-extension://${browser.runtime.id}/caption-editor.html?v=${videoId}`;
+			await browser.tabs.create({ url: extensionUrl });
 
 			window.close();
 		} catch (error) {

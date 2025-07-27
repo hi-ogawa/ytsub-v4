@@ -1,3 +1,4 @@
+import { browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { createRpcClient, registerRpcHandler } from "../../utils/rpc";
@@ -175,8 +176,8 @@ export async function main(ctx: ContentScriptContext) {
 		// We're in an iframe - set up communication with extension pages directly
 		console.log("Content script running in iframe context");
 
-		// Listen for messages from extension pages via chrome.tabs.sendMessage
-		chrome.runtime.onMessage.addListener(
+		// Listen for messages from extension pages via browser.tabs.sendMessage
+		browser.runtime.onMessage.addListener(
 			async (message, sender, sendResponse) => {
 				console.log(
 					"Iframe content script received message:",
@@ -195,7 +196,7 @@ export async function main(ctx: ContentScriptContext) {
 						});
 
 						// Send response back to extension page
-						chrome.runtime.sendMessage({
+						browser.runtime.sendMessage({
 							type: "YOUTUBE_API_RESPONSE",
 							requestId: message.requestId,
 							success: true,
@@ -205,7 +206,7 @@ export async function main(ctx: ContentScriptContext) {
 						sendResponse({ processed: true });
 					} catch (error) {
 						// Send error response back to extension page
-						chrome.runtime.sendMessage({
+						browser.runtime.sendMessage({
 							type: "YOUTUBE_API_RESPONSE",
 							requestId: message.requestId,
 							success: false,
@@ -225,7 +226,7 @@ export async function main(ctx: ContentScriptContext) {
 
 		// Signal to extension pages that iframe content script is ready
 		setTimeout(() => {
-			chrome.runtime.sendMessage({
+			browser.runtime.sendMessage({
 				type: "IFRAME_CONTENT_SCRIPT_READY",
 				origin: window.location.origin,
 				frameUrl: window.location.href,
