@@ -203,8 +203,7 @@ function App() {
 				{/* Hidden YouTube iframe for API access */}
 				<iframe
 					id="youtube-api-frame"
-					// src={videoId ? `https://www.youtube.com/embed/${videoId}` : "https://www.youtube.com/embed/dQw4w9WgXcQ"}
-					src={"https://www.youtube.com/embed/dQw4w9WgXcQ"}
+					src={"https://www.youtube.com/embed/"}
 					style={{
 						position: "absolute",
 						top: "-1000px",
