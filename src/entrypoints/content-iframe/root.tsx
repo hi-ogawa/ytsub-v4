@@ -148,10 +148,7 @@ function MainView(props: {
 	}, [language1, language2]);
 
 	return (
-		<div className={cls(
-			"flex flex-col gap-2 h-full",
-			isCreatingCaptions ? "" : "justify-end"
-		)}>
+		<div className="flex flex-col gap-2 h-full justify-end">
 			{isCreatingCaptions ? (
 				<CaptionCreatorView
 					captionEntries={captionEntries || []}
