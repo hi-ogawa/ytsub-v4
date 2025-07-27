@@ -1,3 +1,4 @@
+import { browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { createRpcClient, registerRpcHandler } from "../../utils/rpc";
@@ -50,6 +51,29 @@ export class ContentService {
 
 	fetchMetadata(videoId: string) {
 		return fetchMetadataJson(videoId);
+	}
+
+	// Add iframe support for API access from extension page
+	async handleIframeApiRequest(request: any) {
+		try {
+			switch (request.action) {
+				case "fetchMetadata":
+					return await this.fetchMetadata(request.videoId);
+				case "fetchCaptionEntries":
+					// TODO: Implement caption fetching
+					return {
+						success: true,
+						message: "Caption fetching not implemented yet",
+					};
+				default:
+					throw new Error(`Unknown action: ${request.action}`);
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : "Unknown error",
+			};
+		}
 	}
 
 	getPageState() {
@@ -146,4 +170,67 @@ export async function main(ctx: ContentScriptContext) {
 	const tabId = await tabIdPromise.promise;
 	const service = new ContentService(ctx, tabId);
 	registerRpcHandler("content-rpc", service);
+
+	// Add iframe-specific message handling for extension page communication
+	if (window !== window.top) {
+		// We're in an iframe - set up communication with extension pages directly
+		console.log("Content script running in iframe context");
+
+		// Listen for messages from extension pages via browser.tabs.sendMessage
+		browser.runtime.onMessage.addListener(
+			async (message, sender, sendResponse) => {
+				console.log(
+					"Iframe content script received message:",
+					message,
+					"from:",
+					sender,
+				);
+
+				if (message.type === "YOUTUBE_API_REQUEST") {
+					console.log("Processing API request in iframe:", message);
+
+					try {
+						const result = await service.handleIframeApiRequest({
+							action: message.action,
+							videoId: message.videoId,
+						});
+
+						// Send response back to extension page
+						browser.runtime.sendMessage({
+							type: "YOUTUBE_API_RESPONSE",
+							requestId: message.requestId,
+							success: true,
+							data: result,
+						});
+
+						sendResponse({ processed: true });
+					} catch (error) {
+						// Send error response back to extension page
+						browser.runtime.sendMessage({
+							type: "YOUTUBE_API_RESPONSE",
+							requestId: message.requestId,
+							success: false,
+							error: error instanceof Error ? error.message : "Unknown error",
+						});
+
+						sendResponse({
+							processed: false,
+							error: error instanceof Error ? error.message : "Unknown error",
+						});
+					}
+
+					return true; // Keep the message channel open for async response
+				}
+			},
+		);
+
+		// Signal to extension pages that iframe content script is ready
+		setTimeout(() => {
+			browser.runtime.sendMessage({
+				type: "IFRAME_CONTENT_SCRIPT_READY",
+				origin: window.location.origin,
+				frameUrl: window.location.href,
+			});
+		}, 2000); // Wait a bit longer for iframe to fully load
+	}
 }
