@@ -6,11 +6,18 @@ export default defineConfig({
 	srcDir: "./src",
 	manifest: (env) => ({
 		name: env.command === "build" ? "ytsub" : "ytsub (dev)",
-		permissions: ["activeTab", "storage", "clipboardWrite"],
+		permissions: ["activeTab", "storage", "clipboardWrite", "tabs"],
 		web_accessible_resources: [
 			{
 				resources: ["content-iframe.html"],
 				matches: ["https://www.youtube.com/*"],
+			},
+		],
+		content_scripts: [
+			{
+				matches: ["*://*.youtube.com/*"],
+				js: ["content-scripts/content.js"],
+				all_frames: true, // Allow injection into iframes
 			},
 		],
 	}),
