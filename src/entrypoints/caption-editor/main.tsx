@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./style.css";
 
 function App() {
-	const [videoId, setVideoId] = React.useState("");
+	const [videoId, setVideoId] = React.useState("pTycfmVzdl8");
 	const [metadata, setMetadata] = React.useState<any>(null);
 	const [error, setError] = React.useState<string>("");
 	const [isLoading, setIsLoading] = React.useState(false);
@@ -145,7 +145,7 @@ function App() {
 					<div className="input-group">
 						<input
 							type="text"
-							placeholder="Enter YouTube Video ID (e.g., dQw4w9WgXcQ)"
+							placeholder="Enter YouTube Video ID"
 							value={videoId}
 							onChange={(e) => setVideoId(e.target.value)}
 							className="video-input"
