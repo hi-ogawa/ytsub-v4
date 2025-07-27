@@ -156,10 +156,7 @@ function MainView(props: {
 					setIsCreatingCaptions={setIsCreatingCaptions}
 				/>
 			) : captionEntries ? (
-				<CaptionsView
-					captionEntries={captionEntries}
-					autoScroll={autoScroll}
-				/>
+				<CaptionsView captionEntries={captionEntries} autoScroll={autoScroll} />
 			) : null}
 			<div className="flex gap-2 items-stretch">
 				<SelectWrapper
@@ -494,9 +491,9 @@ function CaptionEntryView(props: {
 							className="icon-[ri--time-line] w-3.5 h-3.5 text-gray-500 hover:text-gray-700 cursor-pointer"
 							onClick={async () => {
 								if (!props.setCaptionEntries || !props.captionEntries) return;
-								
+
 								const state = await rpc.getVideoState();
-								
+
 								// Update both current entry's begin and previous entry's end in one operation
 								const updatedEntries = props.captionEntries.map((entry, i) => {
 									if (i === props.entry.index) {
@@ -508,14 +505,24 @@ function CaptionEntryView(props: {
 									}
 									return entry;
 								});
-								
+
 								props.setCaptionEntries(updatedEntries);
-								
+
 								// Update storage
 								videoStorage.setValue({
 									lastSelected: {
-										language1: { vssId: "custom-1", languageCode: "custom-1", baseUrl: "", name: { runs: [{ text: "Custom Language 1" }] } },
-										language2: { vssId: "custom-2", languageCode: "custom-2", baseUrl: "", name: { runs: [{ text: "Custom Language 2" }] } },
+										language1: {
+											vssId: "custom-1",
+											languageCode: "custom-1",
+											baseUrl: "",
+											name: { runs: [{ text: "Custom Language 1" }] },
+										},
+										language2: {
+											vssId: "custom-2",
+											languageCode: "custom-2",
+											baseUrl: "",
+											name: { runs: [{ text: "Custom Language 2" }] },
+										},
 										captionEntries: updatedEntries,
 									},
 								});
@@ -983,7 +990,8 @@ function CaptionCreatorView({
 						</span>
 					</div>
 					<div className="text-xs text-gray-500">
-						💡 Click start time (⏰) to set current video time. Previous entry's end time auto-aligns (unless locked 🔒).
+						💡 Click start time (⏰) to set current video time. Previous entry's
+						end time auto-aligns (unless locked 🔒).
 					</div>
 				</div>
 			</div>
