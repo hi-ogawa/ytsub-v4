@@ -1,9 +1,10 @@
 import "../../styles.css";
 import ReactDomClient from "react-dom/client";
+import { getUiParams } from "../../utils/ui-params";
 import { Root } from "./root";
 import { RootControl } from "./root-control";
 
-const uiParams = new URL(window.location.href).searchParams;
+const uiParams = getUiParams();
 const isControl = uiParams.has("control");
 
 async function main() {

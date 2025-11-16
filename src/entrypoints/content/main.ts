@@ -1,12 +1,17 @@
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
-import { createIframeUi } from "wxt/utils/content-script-ui/iframe";
 import { createRpcClient, registerRpcHandler } from "../../utils/rpc";
+import {
+	createContentScriptUi,
+	getDefaultUiMode,
+	type UnifiedContentScriptUi,
+} from "../../utils/ui-manager";
 import { fetchMetadataJson, parseVideoId } from "../../utils/youtube";
 import type { BackgroundService } from "../background/main";
 
 export class ContentService {
-	ui?: ReturnType<typeof createIframeUi>;
-	controlUI: ReturnType<typeof createIframeUi>;
+	ui?: UnifiedContentScriptUi;
+	controlUI!: UnifiedContentScriptUi;
+	uiMode = getDefaultUiMode();
 
 	constructor(
 		public ctx: ContentScriptContext,
@@ -18,7 +23,9 @@ export class ContentService {
 			if (lastVideoId !== newVideoId) {
 				this.hideUI();
 			}
-			this.controlUI.wrapper.hidden = !newVideoId;
+			if (this.controlUI) {
+				this.controlUI.wrapper.hidden = !newVideoId;
+			}
 		});
 
 		// TODO: close UI when full screen mode?
@@ -28,20 +35,24 @@ export class ContentService {
 		// 	}
 		// }, 200);
 
-		this.controlUI = createIframeUi(this.ctx, {
-			page: `content-iframe.html?tabId=${this.tabId}&control=true`,
+		// Initialize control UI with the selected mode
+		this.initControlUI();
+	}
+
+	async initControlUI() {
+		this.controlUI = await createContentScriptUi(this.ctx, {
+			mode: this.uiMode,
+			tabId: this.tabId,
+			isControl: true,
 			position: "inline",
 			anchor: "body",
-			onMount: (wrapper, iframe) => {
+			onMount: async (wrapper) => {
 				wrapper.style.position = "fixed";
 				wrapper.style.height = "45px";
 				wrapper.style.width = "45px";
 				wrapper.style.right = "15px";
 				wrapper.style.bottom = "15px";
 				wrapper.style.zIndex = "100000";
-				iframe.style.width = "100%";
-				iframe.style.height = "100%";
-				iframe.style.border = "none";
 				wrapper.hidden = !this.getPageState().videoId;
 			},
 		});
@@ -96,20 +107,19 @@ export class ContentService {
 		}
 		video.loop = true;
 		const width = await bgRpc.getUiWidth();
-		this.ui = createIframeUi(this.ctx, {
-			page: `content-iframe.html?tabId=${this.tabId}&videoId=${videoId}`,
+		this.ui = await createContentScriptUi(this.ctx, {
+			mode: this.uiMode,
+			tabId: this.tabId,
+			videoId,
 			position: "inline",
 			anchor: "body",
-			onMount: async (wrapper, iframe) => {
+			onMount: async (wrapper) => {
 				wrapper.style.position = "fixed";
 				wrapper.style.top = "65px";
 				wrapper.style.bottom = "65px";
 				wrapper.style.right = "10px";
 				wrapper.style.width = `${width}px`;
 				wrapper.style.zIndex = "100000";
-				iframe.style.width = "100%";
-				iframe.style.height = "100%";
-				iframe.style.border = "none";
 			},
 		});
 		this.ui.mount();

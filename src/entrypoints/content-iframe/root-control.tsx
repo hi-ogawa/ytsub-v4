@@ -1,9 +1,10 @@
 import { useStore } from "@tanstack/react-store";
 import { AsyncQueryStore } from "../../utils/storage";
 import { cls } from "../../utils/ui";
+import { getUiParams } from "../../utils/ui-params";
 import { createContentServiceClient } from "../content/rpc";
 
-const uiParams = new URL(window.location.href).searchParams;
+const uiParams = getUiParams();
 const tabId = Number(uiParams.get("tabId"));
 const rpc = createContentServiceClient(tabId);
 

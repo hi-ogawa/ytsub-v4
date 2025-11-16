@@ -9,6 +9,7 @@ import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
 import { WxtStorageStore } from "../../utils/storage";
 import { cls, SelectWrapper } from "../../utils/ui";
+import { getUiParams } from "../../utils/ui-params";
 import {
 	type CaptionEntry,
 	type CaptionTrackMetadata,
@@ -20,7 +21,7 @@ import { createContentServiceClient } from "../content/rpc";
 
 const queryClient = new QueryClient();
 
-const uiParams = new URL(window.location.href).searchParams;
+const uiParams = getUiParams();
 const tabId = Number(uiParams.get("tabId"));
 const videoId = String(uiParams.get("videoId"));
 
