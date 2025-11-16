@@ -10,6 +10,106 @@ This extension fetches video metadata and captions directly from YouTube without
 
 However, this approach requires workarounds to bypass YouTube's bot detection and access restrictions.
 
+## Critical Architectural Constraint
+
+**The YouTube API requests MUST be made from the content script context, NOT from iframe or background scripts.**
+
+### Why This Matters
+
+The fetch requests to YouTube's internal APIs (`/youtubei/v1/player` and watch pages) must originate from the content script that runs in the YouTube page context because:
+
+1. **CORS Restrictions**: YouTube's servers only allow requests from the same origin (`youtube.com`). Requests from:
+   - **Iframe**: Would fail CORS checks as iframes have their own origin (`chrome-extension://...`)
+   - **Background Script**: Would fail CORS checks as background scripts run in extension context
+   - **Content Script**: ✅ Works because content scripts run in the page's origin context
+
+2. **Cookie and Session Access**: The content script has access to YouTube's cookies and session data, which may be needed for the API requests to succeed.
+
+### RPC Architecture Consequence
+
+Because the UI runs in an iframe (development) or shadow DOM (production), but the API fetches must happen in the content script, we need an RPC (Remote Procedure Call) layer:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    YouTube Page                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Content Script (content/main.ts)                      │ │
+│  │  • Has YouTube page origin context                     │ │
+│  │  • Can make fetch() to YouTube APIs                    │ │
+│  │  • Exposes ContentService via RPC                      │ │
+│  │                                                         │ │
+│  │  ContentService.fetchMetadata(videoId) {               │ │
+│  │    return fetchMetadataJson(videoId);  // Works! ✅    │ │
+│  │  }                                                      │ │
+│  └────────────────────────┬───────────────────────────────┘ │
+│                           │ RPC                              │
+│                           │ (browser.runtime messaging)      │
+│  ┌────────────────────────▼───────────────────────────────┐ │
+│  │  UI Component (iframe or shadow DOM)                   │ │
+│  │  • Different context (extension origin)                │ │
+│  │  • Cannot fetch() YouTube APIs directly ❌             │ │
+│  │  • Uses RPC to call content script                     │ │
+│  │                                                         │ │
+│  │  const rpc = createContentServiceClient(tabId);        │ │
+│  │  const metadata = await rpc.fetchMetadata(videoId);    │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Implementation Details
+
+**Content Script** (`src/entrypoints/content/main.ts`):
+```typescript
+export class ContentService {
+  fetchMetadata(videoId: string) {
+    // This runs in YouTube page context - can access YouTube APIs
+    return fetchMetadataJson(videoId);
+  }
+}
+
+// Register service to handle RPC calls from UI
+export async function main(ctx: ContentScriptContext) {
+  const tabId = await tabIdPromise.promise;
+  const service = new ContentService(ctx, tabId);
+  await service.waitForInit();
+  registerRpcHandler("content-rpc", service);  // ← Expose service via RPC
+}
+```
+
+**UI Component** (`src/entrypoints/content-iframe/root.tsx`):
+```typescript
+// Create RPC client to call content script
+const rpc = createContentServiceClient(tabId);
+
+function RootInner() {
+  const query = useQuery({
+    queryKey: ["fetchMetadata"],
+    queryFn: async () => {
+      // Call content script via RPC to fetch metadata
+      const metadata = await rpc.fetchMetadata(videoId);  // ← RPC call
+      return { metadata };
+    },
+  });
+}
+```
+
+**RPC Setup** (`src/entrypoints/content/rpc.ts`):
+```typescript
+const RPC_NAME = "content-rpc";
+
+// Server side - expose ContentService
+export function registerContentService(contentService: ContentService) {
+  registerRpcHandler(RPC_NAME, contentService);
+}
+
+// Client side - create proxy to ContentService
+export function createContentServiceClient(tabId: number) {
+  return createRpcClient<ContentService>(RPC_NAME, tabId);
+}
+```
+
+This RPC layer adds complexity but is **necessary** because the UI and API fetching must run in different contexts.
+
 ## Workaround Details
 
 ### 1. Fetching Video Metadata
