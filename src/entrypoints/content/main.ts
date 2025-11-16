@@ -10,8 +10,9 @@ import type { BackgroundService } from "../background/main";
 
 export class ContentService {
 	ui?: UnifiedContentScriptUi;
-	controlUI!: UnifiedContentScriptUi;
+	controlUI?: UnifiedContentScriptUi;
 	uiMode = getDefaultUiMode();
+	private initPromise: Promise<void>;
 
 	constructor(
 		public ctx: ContentScriptContext,
@@ -35,8 +36,8 @@ export class ContentService {
 		// 	}
 		// }, 200);
 
-		// Initialize control UI with the selected mode
-		this.initControlUI();
+		// Initialize control UI with the selected mode (async)
+		this.initPromise = this.initControlUI();
 	}
 
 	async initControlUI() {
@@ -57,6 +58,10 @@ export class ContentService {
 			},
 		});
 		this.controlUI.mount();
+	}
+
+	async waitForInit() {
+		await this.initPromise;
 	}
 
 	fetchMetadata(videoId: string) {
@@ -155,5 +160,6 @@ const bgRpc = createRpcClient<BackgroundService>("background-rpc", undefined, {
 export async function main(ctx: ContentScriptContext) {
 	const tabId = await tabIdPromise.promise;
 	const service = new ContentService(ctx, tabId);
+	await service.waitForInit();
 	registerRpcHandler("content-rpc", service);
 }
